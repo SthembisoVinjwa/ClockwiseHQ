@@ -1,3 +1,5 @@
+import 'package:clockwisehq/screens/marking_and_records.dart';
+import 'package:clockwisehq/screens/timetable_and_events.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -6,20 +8,20 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
-    void _scrollToNext() {
-      _scrollController.animateTo(
-        _scrollController.offset + 300,
-        duration: Duration(milliseconds: 200),
+    void scrollToNext() {
+      scrollController.animateTo(
+        scrollController.offset + 300,
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
     }
 
-    void _scrollToPrev() {
-      _scrollController.animateTo(
-        _scrollController.offset - 300,
-        duration: Duration(milliseconds: 200),
+    void scrollToPrev() {
+      scrollController.animateTo(
+        scrollController.offset - 300,
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
     }
@@ -31,52 +33,52 @@ class Home extends StatelessWidget {
             padding: EdgeInsets.zero,
             children: <Widget>[
               UserAccountsDrawerHeader(
-                accountName: Text('John Doe'),
-                accountEmail: Text('johndoe@email.com'),
+                accountName: const Text('John Doe'),
+                accountEmail: const Text('johndoe@email.com'),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.grey[600],
-                  child: Text(
+                  child: const Text(
                     'JD',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.home),
-                title: Text('Home'),
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to home page
                 },
               ),
               ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Manage timetable'),
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Manage timetable'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to schedule page
                 },
               ),
               ListTile(
-                leading: Icon(Icons.assignment),
-                title: Text('Attendance Records'),
+                leading: const Icon(Icons.assignment),
+                title: const Text('Attendance Records'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to attendance records page
                 },
               ),
-              Divider(),
+              const Divider(),
               ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to settings page
                 },
               ),
               ListTile(
-                leading: Icon(Icons.help),
-                title: Text('Help'),
+                leading: const Icon(Icons.help),
+                title: const Text('Help'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to help page
@@ -88,9 +90,10 @@ class Home extends StatelessWidget {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: AppBar(
-            elevation: 5.0,
+            elevation: 1.0,
             title: Row(
-              children: [
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
                 Icon(Icons.access_time_filled_outlined),
                 Text(
                   "ClockwiseHQ",
@@ -103,13 +106,13 @@ class Home extends StatelessWidget {
             centerTitle: true,
             actions: [
               IconButton(
-                icon: Icon(Icons.notifications_none_sharp, size: 30.0),
+                icon: const Icon(Icons.notifications_none_sharp, size: 30.0),
                 onPressed: () {
                   // Show list of notifications
                   showNotifications(context);
                 },
               ),
-              Padding(
+              /*Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: ElevatedButton(
                     style: ButtonStyle(
@@ -129,7 +132,7 @@ class Home extends StatelessWidget {
                         Text('Log In'), // text
                       ],
                     ),
-                  ))
+                  ))*/
             ],
           ),
         ),
@@ -159,14 +162,15 @@ class Home extends StatelessWidget {
                           firstDay: DateTime.utc(2010, 10, 16),
                           lastDay: DateTime.utc(2030, 10, 16)),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         width: 320,
                         child: Card(
                           elevation: 1.0,
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(width: 1, color: Colors.grey[600]!),
+                            side:
+                                BorderSide(width: 1, color: Colors.grey[600]!),
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Column(
@@ -184,14 +188,14 @@ class Home extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Divider(thickness: 1.0),
+                              const Divider(thickness: 1.0),
                               Expanded(
                                 child: ListView(
-                                  controller: _scrollController,
+                                  controller: scrollController,
                                   scrollDirection: Axis.horizontal,
                                   shrinkWrap: true,
-                                  children: [
-                                    Container(
+                                  children: const [
+                                    SizedBox(
                                       width: 300,
                                       child: ListTile(
                                         leading: Icon(Icons.calendar_today),
@@ -199,7 +203,7 @@ class Home extends StatelessWidget {
                                         subtitle: Text('8:00 AM - 9:00 AM'),
                                       ),
                                     ),
-                                    Container(
+                                    SizedBox(
                                       width: 300,
                                       child: ListTile(
                                         leading: Icon(Icons.calendar_today),
@@ -207,7 +211,7 @@ class Home extends StatelessWidget {
                                         subtitle: Text('10:00 AM - 11:00 AM'),
                                       ),
                                     ),
-                                    Container(
+                                    SizedBox(
                                       width: 300,
                                       child: ListTile(
                                         leading: Icon(Icons.calendar_today),
@@ -222,16 +226,18 @@ class Home extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.arrow_back),
+                                    icon: const Icon(Icons.arrow_back),
                                     onPressed: () {
-                                      _scrollToPrev();
+                                      scrollToPrev();
                                     },
                                   ),
-                                  SizedBox(width: 50,),
+                                  const SizedBox(
+                                    width: 50,
+                                  ),
                                   IconButton(
-                                    icon: Icon(Icons.arrow_forward),
+                                    icon: const Icon(Icons.arrow_forward),
                                     onPressed: () {
-                                      _scrollToNext();
+                                      scrollToNext();
                                     },
                                   ),
                                 ],
@@ -259,7 +265,7 @@ class Home extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
                           backgroundColor: Colors.indigoAccent,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -268,32 +274,10 @@ class Home extends StatelessWidget {
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
                         },
-                        child: Text('View Timetable'),
+                        child: const Text('View Timetable'),
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    SizedBox(
-                      width: 250,
-                      height: 40,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ), // Text color
-                        ),
-                        onPressed: () {
-                          // Code for navigating to create/manage timetable screen
-                        },
-                        child: Text('Manage Timetable and Events'),
-                      ),
-                    ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     SizedBox(
@@ -311,8 +295,40 @@ class Home extends StatelessWidget {
                         ),
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ManageTimetable()),
+                          );
                         },
-                        child: Text('Attendance Marking and Records'),
+                        child: const Text('Manage Timetable and Events'),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: 250,
+                      height: 40,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.indigoAccent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ), // Text color
+                        ),
+                        onPressed: () {
+                          // Code for navigating to create/manage timetable screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MarkingRecords()),
+                          );
+                        },
+                        child: const Text('Attendance Records and Marking'),
                       ),
                     ),
                     const SizedBox(
@@ -334,7 +350,7 @@ class Home extends StatelessWidget {
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
                         },
-                        child: Text('Settings'),
+                        child: const Text('Settings'),
                       ),
                     ),
                   ],
@@ -350,24 +366,24 @@ class Home extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Notifications'),
-          content: Container(
+          title: const Text('Notifications'),
+          content: SizedBox(
             width: double.maxFinite,
             height: 200,
             child: ListView.builder(
               itemCount: 10,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  leading: Icon(Icons.notifications),
+                  leading: const Icon(Icons.notifications),
                   title: Text('Notification ${index + 1}'),
-                  subtitle: Text('This is a notification'),
+                  subtitle: const Text('This is a notification'),
                 );
               },
             ),
           ),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
