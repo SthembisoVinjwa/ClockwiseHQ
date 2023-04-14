@@ -3,12 +3,19 @@ import 'package:clockwisehq/screens/timetable_and_events.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
+    DateTime _focusedDay = DateTime.now();
+    DateTime? _selectedDay;
 
     void scrollToNext() {
       scrollController.animateTo(
@@ -142,25 +149,33 @@ class Home extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Container(
-                color: Colors.white,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(
                       height: 260,
                       width: 320,
-                      child: TableCalendar(
-                          calendarStyle: CalendarStyle(
-                            todayDecoration: BoxDecoration(
-                              color:
-                                  Colors.indigoAccent.shade200.withAlpha(200),
-                              shape: BoxShape.circle,
-                            ),
+                      child: StatefulBuilder(
+                        builder: (context, setState) => TableCalendar(
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDay = selectedDay;
+                              _focusedDay = focusedDay;
+                            });
+                          },
+                          calendarStyle: const CalendarStyle(
+                            cellMargin: EdgeInsets.all(4),
                           ),
+                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                           shouldFillViewport: true,
-                          focusedDay: DateTime.now(),
+                          availableGestures: AvailableGestures.all,
+                          headerStyle: const HeaderStyle(
+                              formatButtonVisible: false, titleCentered: true),
+                          focusedDay: _focusedDay,
                           firstDay: DateTime.utc(2010, 10, 16),
-                          lastDay: DateTime.utc(2030, 10, 16)),
+                          lastDay: DateTime.utc(2030, 10, 16),
+                        ),
+                      )
                     ),
                     const SizedBox(height: 5),
                     Expanded(
@@ -180,7 +195,7 @@ class Home extends StatelessWidget {
                                 padding: EdgeInsets.only(bottom: 2, top: 8),
                                 child: Center(
                                   child: Text(
-                                    'Upcoming Class/Event',
+                                    'Classes and Events',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16.0,
