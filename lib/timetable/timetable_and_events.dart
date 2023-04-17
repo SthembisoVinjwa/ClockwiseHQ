@@ -1,3 +1,4 @@
+import 'package:clockwisehq/timetable/weekly.dart';
 import 'package:flutter/material.dart';
 
 class ManageTimetable extends StatefulWidget {
@@ -29,6 +30,7 @@ class _ManageTimetableState extends State<ManageTimetable> {
           ),
         ),
       ),
+      body: const WeekTimetable(),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:clockwisehq/screens/marking_and_records.dart';
-import 'package:clockwisehq/screens/timetable_and_events.dart';
+import 'package:clockwisehq/timetable/timetable_and_events.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -15,7 +15,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
     DateTime _focusedDay = DateTime.now();
-    DateTime? _selectedDay;
+    DateTime _selectedDay = _focusedDay;
 
     void scrollToNext() {
       scrollController.animateTo(
