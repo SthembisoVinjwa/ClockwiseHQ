@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'activity.dart';
 
@@ -10,29 +11,57 @@ class WeekTimetable extends StatefulWidget {
 }
 
 class _WeekTimetableState extends State<WeekTimetable> {
+  late BannerAd _bannerAd;
+  bool _isAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initBannerAd();
+  }
+
+  void _initBannerAd() {
+    _bannerAd = BannerAd(
+        size: AdSize.banner,
+        adUnitId: 'ca-app-pub-7872743903266632/8320653540',
+        listener: BannerAdListener(
+            onAdLoaded: (ad) {
+              setState(() {
+                _isAdLoaded = true;
+              });
+            },
+            onAdFailedToLoad: (ad, error) {
+              print(error);
+            }
+        ),
+        request: AdRequest());
+
+    _bannerAd.load();
+  }
+
   final List<Activity> activities = [
     Activity(
-      'Yoga class',
-      'Yoga studio',
-      'Jane Doe',
+      'Maths 244',
+      'Jan Mouton',
+      'Dr. Gray',
       [TimeOfDay(hour: 10, minute: 0)],
       ['Mon', 'Wed', 'Fri'],
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
     ),
     Activity(
-      'Pilates class',
-      'Fitness center',
-      'John Smith',
+      'Com Sci 344',
+      'Enginerring building room A303',
+      'Willem Bester',
       [TimeOfDay(hour: 9, minute: 0), TimeOfDay(hour: 10, minute: 0)],
       ['Tue', 'Thu'],
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
     ),
     Activity(
-      'Dance class',
-      'Dance studio',
-      'Emily Brown',
+      'GIT 312',
+      'Geology Building',
+      'Dr. Stuurman',
       [TimeOfDay(hour: 19, minute: 0), TimeOfDay(hour: 20, minute: 0)],
       ['Mon', 'Wed'],
       DateTime(2023, 4, 1),
@@ -42,11 +71,48 @@ class _WeekTimetableState extends State<WeekTimetable> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: buildDataTable(),
+    return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: 145,
+        height: 40,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.indigoAccent,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ), // Text color
+          ),
+          onPressed: () {
+            // Code for navigating to create/manage timetable screen
+          },
+          child: const Text('Add Class/Event'),
+        ),
+      ),
+      body: Column(
+        children: [
+          if (_isAdLoaded)
+            Expanded(
+              child: SizedBox(
+                height: _bannerAd.size.height.toDouble(),
+                width: _bannerAd.size.width.toDouble(),
+                child: AdWidget(ad: _bannerAd,),
+              ),
+            ),
+          SizedBox(
+            height: 635,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: buildDataTable(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -77,10 +143,14 @@ class _WeekTimetableState extends State<WeekTimetable> {
     ];
 
     return DataTable(
-      border: TableBorder.all(),
+      border: TableBorder.all(color: Colors.grey),
       columns: [
-        DataColumn(label: Text('Time')),
-        ...daysOfWeek.map((day) => DataColumn(label: Text(day))),
+        DataColumn(label: Text('')),
+        ...daysOfWeek.map((day) => DataColumn(
+                label: Text(
+              day,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ))),
       ],
       rows: [
         for (final time in timesOfDay)
