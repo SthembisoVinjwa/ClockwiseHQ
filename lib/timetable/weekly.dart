@@ -52,6 +52,10 @@ class _WeekTimetableState extends State<WeekTimetable> {
   }
 
   Widget buildDataTable() {
+    final now = DateTime.now();
+    final activeActivities = activities.where((activity) =>
+        now.isAfter(activity.startDate) && now.isBefore(activity.endDate));
+
     final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final timesOfDay = [
       TimeOfDay(hour: 7, minute: 0),
@@ -84,10 +88,10 @@ class _WeekTimetableState extends State<WeekTimetable> {
             DataCell(Text(time.format(context))),
             for (final day in daysOfWeek)
               DataCell(Text(
-                activities
+                activeActivities
                     .where((activity) =>
-                activity.daysOfWeek.contains(day) &&
-                    activity.times.contains(time))
+                        activity.daysOfWeek.contains(day) &&
+                        activity.times.contains(time))
                     .map((activity) => activity.title)
                     .join('\n'),
               )),
@@ -95,5 +99,4 @@ class _WeekTimetableState extends State<WeekTimetable> {
       ],
     );
   }
-
 }
