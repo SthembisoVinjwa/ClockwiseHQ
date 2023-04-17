@@ -34,7 +34,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
               print(error);
             }
         ),
-        request: AdRequest());
+        request: const AdRequest());
 
     _bannerAd.load();
   }
@@ -44,7 +44,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
       'Maths 244',
       'Jan Mouton',
       'Dr. Gray',
-      [TimeOfDay(hour: 10, minute: 0)],
+      [const TimeOfDay(hour: 10, minute: 0)],
       ['Mon', 'Wed', 'Fri'],
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
@@ -53,7 +53,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
       'Com Sci 344',
       'Enginerring building room A303',
       'Willem Bester',
-      [TimeOfDay(hour: 9, minute: 0), TimeOfDay(hour: 10, minute: 0)],
+      [const TimeOfDay(hour: 9, minute: 0), const TimeOfDay(hour: 10, minute: 0)],
       ['Tue', 'Thu'],
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
@@ -62,7 +62,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
       'GIT 312',
       'Geology Building',
       'Dr. Stuurman',
-      [TimeOfDay(hour: 19, minute: 0), TimeOfDay(hour: 20, minute: 0)],
+      [const TimeOfDay(hour: 19, minute: 0), const TimeOfDay(hour: 20, minute: 0)],
       ['Mon', 'Wed'],
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
@@ -123,7 +123,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
         now.isAfter(activity.startDate) && now.isBefore(activity.endDate));
 
     final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final timesOfDay = [
+    const timesOfDay = [
       TimeOfDay(hour: 7, minute: 0),
       TimeOfDay(hour: 8, minute: 0),
       TimeOfDay(hour: 9, minute: 0),
@@ -145,11 +145,11 @@ class _WeekTimetableState extends State<WeekTimetable> {
     return DataTable(
       border: TableBorder.all(color: Colors.grey),
       columns: [
-        DataColumn(label: Text('')),
+        const DataColumn(label: Text('')),
         ...daysOfWeek.map((day) => DataColumn(
                 label: Text(
               day,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ))),
       ],
       rows: [
@@ -157,13 +157,19 @@ class _WeekTimetableState extends State<WeekTimetable> {
           DataRow(cells: [
             DataCell(Text(time.format(context))),
             for (final day in daysOfWeek)
-              DataCell(Text(
-                activeActivities
-                    .where((activity) =>
-                        activity.daysOfWeek.contains(day) &&
-                        activity.times.contains(time))
-                    .map((activity) => activity.title)
-                    .join('\n'),
+              DataCell(SizedBox(
+                width: 55,
+                child: Text(
+                  maxLines: 3,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                  activeActivities
+                      .where((activity) =>
+                          activity.daysOfWeek.contains(day) &&
+                          activity.times.contains(time))
+                      .map((activity) => activity.title)
+                      .join('\n'),
+                ),
               )),
           ]),
       ],

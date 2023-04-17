@@ -1,14 +1,13 @@
-import 'package:clockwisehq/timetable/weekly.dart';
 import 'package:flutter/material.dart';
 
-class ManageTimetable extends StatefulWidget {
-  const ManageTimetable({Key? key}) : super(key: key);
+class ManageTimetables extends StatefulWidget {
+  const ManageTimetables({Key? key}) : super(key: key);
 
   @override
-  State<ManageTimetable> createState() => _ManageTimetableState();
+  State<ManageTimetables> createState() => _ManageTimetablesState();
 }
 
-class _ManageTimetableState extends State<ManageTimetable> {
+class _ManageTimetablesState extends State<ManageTimetables> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,14 +22,13 @@ class _ManageTimetableState extends State<ManageTimetable> {
             },
           ),
           title: const Text(
-            "Manage Timetable and Events",
+            "Manage and Share",
             style: TextStyle(
               fontSize: 18.0,
             ),
           ),
         ),
       ),
-      body: const WeekTimetable(),
     );
   }
 }

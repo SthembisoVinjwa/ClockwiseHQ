@@ -1,5 +1,6 @@
 import 'package:clockwisehq/screens/marking_and_records.dart';
-import 'package:clockwisehq/timetable/timetable_and_events.dart';
+import 'package:clockwisehq/screens/manage_timetable.dart';
+import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -40,12 +41,12 @@ class _HomeState extends State<Home> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               UserAccountsDrawerHeader(
-                accountName: const Text('John Doe'),
-                accountEmail: const Text('johndoe@email.com'),
+                accountName: const Text('Sthembiso Vinjwa'),
+                accountEmail: const Text('vinjwa@email.com'),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.grey[600],
                   child: const Text(
-                    'JD',
+                    'SV',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -288,6 +289,11 @@ class _HomeState extends State<Home> {
                         ),
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ViewTimetable()),
+                          );
                         },
                         child: const Text('View Timetable'),
                       ),
@@ -313,10 +319,10 @@ class _HomeState extends State<Home> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const ManageTimetable()),
+                                builder: (context) => const ManageTimetables()),
                           );
                         },
-                        child: const Text('Manage Timetable and Events'),
+                        child: const Text('Manage and Share'),
                       ),
                     ),
                     const SizedBox(
