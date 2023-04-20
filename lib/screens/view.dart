@@ -1,4 +1,4 @@
-import 'package:clockwisehq/timetable/weekly.dart';
+import 'package:clockwisehq/timetable/timetable.dart';
 import 'package:flutter/material.dart';
 
 class ViewTimetable extends StatefulWidget {
@@ -23,14 +23,14 @@ class _ViewTimetableState extends State<ViewTimetable> {
             },
           ),
           title: const Text(
-            "Manage Timetable and Events",
+            "View Timetable",
             style: TextStyle(
               fontSize: 18.0,
             ),
           ),
         ),
       ),
-      body: const WeekTimetable(),
+      body: const Timetable(),
     );
   }
 }

@@ -4,6 +4,9 @@ import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../file_handling.dart';
+import '../timetable/activity.dart';
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -12,28 +15,108 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final ScrollController scrollController = ScrollController();
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  List<Activity> myActivities = [];
+  bool _isLoadingActivities = false;
+
+  static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const timesOfDay = [
+    TimeOfDay(hour: 7, minute: 0),
+    TimeOfDay(hour: 8, minute: 0),
+    TimeOfDay(hour: 9, minute: 0),
+    TimeOfDay(hour: 10, minute: 0),
+    TimeOfDay(hour: 11, minute: 0),
+    TimeOfDay(hour: 12, minute: 0),
+    TimeOfDay(hour: 13, minute: 0),
+    TimeOfDay(hour: 14, minute: 0),
+    TimeOfDay(hour: 15, minute: 0),
+    TimeOfDay(hour: 16, minute: 0),
+    TimeOfDay(hour: 17, minute: 0),
+    TimeOfDay(hour: 18, minute: 0),
+    TimeOfDay(hour: 19, minute: 0),
+    TimeOfDay(hour: 20, minute: 0),
+    TimeOfDay(hour: 21, minute: 0),
+    TimeOfDay(hour: 22, minute: 0),
+  ];
+
+  void scrollToNext() {
+    scrollController.animateTo(
+      scrollController.offset + 300,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void scrollToPrev() {
+    scrollController.animateTo(
+      scrollController.offset - 300,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _readActivities() async {
+    setState(() {
+      _isLoadingActivities = true;
+    });
+    myActivities = await TimetableFile().readActivitiesFromJsonFile();
+    setState(() {
+      _isLoadingActivities = false;
+    });
+  }
+
+  String formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString();
+
+    return "$day/$month/$year";
+  }
+
+  Widget timetableForDay(DateTime day) {
+    String title = '';
+
+    return ListView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      shrinkWrap: true,
+      children: [
+        for (final time in timesOfDay)
+          if (myActivities
+              .where((activity) =>
+                  day.isAfter(activity.startDate) &&
+                      day.isBefore(activity.endDate) ||
+                  day.isAtSameMomentAs(activity.startDate) ||
+                  day.isAtSameMomentAs(activity.endDate))
+              .where((activity) =>
+                  activity.daysOfWeek.contains(daysOfWeek[day.weekday - 1]) &&
+                  activity.times.contains(time))
+              .map((activity) => title = activity.title)
+              .join('\n')
+              .isNotEmpty)
+            SizedBox(
+              width: 300,
+              child: ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: Text(title),
+                subtitle: Text(
+                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
+              ),
+            ),
+      ],
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _readActivities();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ScrollController scrollController = ScrollController();
-    DateTime _focusedDay = DateTime.now();
-    DateTime _selectedDay = _focusedDay;
-
-    void scrollToNext() {
-      scrollController.animateTo(
-        scrollController.offset + 300,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-    }
-
-    void scrollToPrev() {
-      scrollController.animateTo(
-        scrollController.offset - 300,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-    }
-
     return Scaffold(
         backgroundColor: const Color(0xfffdffff),
         drawer: Drawer(
@@ -156,27 +239,26 @@ class _HomeState extends State<Home> {
                     SizedBox(
                       height: 260,
                       width: 320,
-                      child: StatefulBuilder(
-                        builder: (context, setState) => TableCalendar(
-                          onDaySelected: (selectedDay, focusedDay) {
-                            setState(() {
-                              _selectedDay = selectedDay;
-                              _focusedDay = focusedDay;
-                            });
-                          },
-                          calendarStyle: const CalendarStyle(
-                            cellMargin: EdgeInsets.all(4),
-                          ),
-                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                          shouldFillViewport: true,
-                          availableGestures: AvailableGestures.all,
-                          headerStyle: const HeaderStyle(
-                              formatButtonVisible: false, titleCentered: true),
-                          focusedDay: _focusedDay,
-                          firstDay: DateTime.utc(2010, 10, 16),
-                          lastDay: DateTime.utc(2030, 10, 16),
+                      child: TableCalendar(
+                        onDaySelected: (selectedDay, focusedDay) {
+                          setState(() {
+                            _selectedDay = selectedDay;
+                            _focusedDay = focusedDay;
+                          });
+                        },
+                        calendarStyle: const CalendarStyle(
+                          cellMargin: EdgeInsets.all(4),
                         ),
-                      )
+                        selectedDayPredicate: (day) =>
+                            isSameDay(_selectedDay, day),
+                        shouldFillViewport: true,
+                        availableGestures: AvailableGestures.all,
+                        headerStyle: const HeaderStyle(
+                            formatButtonVisible: false, titleCentered: true),
+                        focusedDay: _focusedDay,
+                        firstDay: DateTime.utc(2010, 10, 16),
+                        lastDay: DateTime.utc(2030, 10, 16),
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Expanded(
@@ -192,11 +274,12 @@ class _HomeState extends State<Home> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(bottom: 2, top: 8),
                                 child: Center(
                                   child: Text(
-                                    'Classes and Events',
+                                    'Classes and Events: ' +
+                                        formatDate(_focusedDay),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16.0,
@@ -206,37 +289,13 @@ class _HomeState extends State<Home> {
                               ),
                               const Divider(thickness: 1.0),
                               Expanded(
-                                child: ListView(
-                                  controller: scrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  children: const [
-                                    SizedBox(
-                                      width: 300,
-                                      child: ListTile(
-                                        leading: Icon(Icons.calendar_today),
-                                        title: Text('Maths 214'),
-                                        subtitle: Text('8:00 AM - 9:00 AM'),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 300,
-                                      child: ListTile(
-                                        leading: Icon(Icons.calendar_today),
-                                        title: Text('Com Sci 344'),
-                                        subtitle: Text('10:00 AM - 11:00 AM'),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 300,
-                                      child: ListTile(
-                                        leading: Icon(Icons.calendar_today),
-                                        title: Text('Com Sci 244 Prac'),
-                                        subtitle: Text('12:00 AM - 11:00 AM'),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                child: _isLoadingActivities
+                                    ? const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.indigoAccent,
+                                        ),
+                                      )
+                                    : timetableForDay(_focusedDay),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -322,7 +381,7 @@ class _HomeState extends State<Home> {
                                 builder: (context) => const ManageTimetables()),
                           );
                         },
-                        child: const Text('Manage and Share'),
+                        child: const Text('Manage and Share Timetables'),
                       ),
                     ),
                     const SizedBox(

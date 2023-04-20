@@ -1,21 +1,24 @@
+import 'package:clockwisehq/file_handling.dart';
 import 'package:clockwisehq/timetable/arrow_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'activity.dart';
 
-class WeekTimetable extends StatefulWidget {
-  const WeekTimetable({Key? key}) : super(key: key);
+class Timetable extends StatefulWidget {
+  const Timetable({Key? key}) : super(key: key);
 
   @override
-  State<WeekTimetable> createState() => _WeekTimetableState();
+  State<Timetable> createState() => _TimetableState();
 }
 
-class _WeekTimetableState extends State<WeekTimetable> {
+class _TimetableState extends State<Timetable> {
   late BannerAd _bannerAd;
   bool _isAdLoaded = false;
   String? _dropdownValue;
   bool set = false;
+  late List<Activity> myActivities;
+  bool _isLoadingActivities = false;
   List<DropdownMenuItem<String>> items = const [
     DropdownMenuItem(
       value: 'Weekly',
@@ -28,7 +31,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
   ];
 
   static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  static final timesOfDay = [
+  static const timesOfDay = [
     TimeOfDay(hour: 7, minute: 0),
     TimeOfDay(hour: 8, minute: 0),
     TimeOfDay(hour: 9, minute: 0),
@@ -47,7 +50,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
     TimeOfDay(hour: 22, minute: 0),
   ];
 
-  String _currentText = daysOfWeek[DateTime.now().weekday-1];
+  String _currentText = daysOfWeek[DateTime.now().weekday - 1];
 
   void _updateText(String newText) {
     setState(() {
@@ -55,10 +58,25 @@ class _WeekTimetableState extends State<WeekTimetable> {
     });
   }
 
+  Future<void> _readActivities() async {
+    setState(() {
+      _isLoadingActivities = true;
+    });
+    myActivities = await TimetableFile().readActivitiesFromJsonFile();
+    setState(() {
+      _isLoadingActivities = false;
+    });
+  }
+
+  Future<void> _saveActivities() async {
+    await TimetableFile().saveActivities(myActivities);
+  }
+
   @override
   void initState() {
     super.initState();
     _initBannerAd();
+    _readActivities();
   }
 
   void _initBannerAd() {
@@ -77,46 +95,10 @@ class _WeekTimetableState extends State<WeekTimetable> {
     _bannerAd.load();
   }
 
-  final List<Activity> activities = [
-    Activity(
-      'Maths 244',
-      'Jan Mouton',
-      'Dr. Gray',
-      [const TimeOfDay(hour: 10, minute: 0)],
-      ['Mon', 'Wed', 'Fri'],
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'Com Sci 344',
-      'Enginerring building room A303',
-      'Willem Bester',
-      [
-        const TimeOfDay(hour: 9, minute: 0),
-        const TimeOfDay(hour: 10, minute: 0)
-      ],
-      ['Tue', 'Thu'],
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'GIT 312',
-      'Geology Building',
-      'Dr. Stuurman',
-      [
-        const TimeOfDay(hour: 19, minute: 0),
-        const TimeOfDay(hour: 20, minute: 0)
-      ],
-      ['Mon', 'Wed'],
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     if (set == false) {
-      _dropdownValue = 'Weekly';
+      _dropdownValue = 'Daily';
       set = true;
     }
 
@@ -154,7 +136,28 @@ class _WeekTimetableState extends State<WeekTimetable> {
             ),
           Row(
             children: [
-              Expanded(child: SizedBox()),
+              _dropdownValue != 'Weekly'
+                  ? SizedBox(
+                      height: 60,
+                      width: 200,
+                      child: ArrowTextWidget(
+                        texts: const [
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat',
+                          'Sun'
+                        ],
+                        onUpdateText: _updateText,
+                        index: DateTime.now().weekday - 1,
+                      ),
+                    )
+                  : const SizedBox(
+                      height: 60,
+                      width: 200,
+                    ),
               DropdownButton(
                 alignment: Alignment.center,
                 hint: const Text('Timeframe'),
@@ -175,38 +178,40 @@ class _WeekTimetableState extends State<WeekTimetable> {
               ),
             ],
           ),
-          SizedBox(
-            height: 605,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
+          if (_isLoadingActivities)
+            Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                ),
+                const Center(
+                    child: CircularProgressIndicator(
+                  color: Colors.indigoAccent,
+                )),
+              ],
+            )
+          else if (myActivities.isNotEmpty)
+            SizedBox(
+              height: 605,
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: _dropdownValue == 'Weekly'
-                    ? buildWeeklyTable()
-                    : Column(
-                        children: [
-                          SizedBox(
-                            height: 60,
-                            child: ArrowTextWidget(
-                              texts: const [
-                                'Mon',
-                                'Tue',
-                                'Wed',
-                                'Thu',
-                                'Fri',
-                                'Sat',
-                                'Sun'
-                              ],
-                              onUpdateText: _updateText,
-                              index: DateTime.now().weekday-1,
-                            ),
-                          ),
-                          buildDailyTimetable(),
-                        ],
-                      ),
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: _dropdownValue == 'Weekly'
+                      ? buildWeeklyTable()
+                      : buildDailyTimetable(),
+                ),
               ),
-            ),
-          ),
+            )
+          else
+            const SizedBox(
+              height: 605,
+              child: Center(
+                  child: Text(
+                'No timetable data found',
+                style: TextStyle(fontSize: 18),
+              )),
+            )
         ],
       ),
     );
@@ -214,8 +219,10 @@ class _WeekTimetableState extends State<WeekTimetable> {
 
   Widget buildWeeklyTable() {
     final now = DateTime.now();
-    final activeActivities = activities.where((activity) =>
-        now.isAfter(activity.startDate) && now.isBefore(activity.endDate));
+    final activeActivities = myActivities.where((activity) =>
+        now.isAfter(activity.startDate) && now.isBefore(activity.endDate) ||
+        now.isAtSameMomentAs(activity.startDate) ||
+        now.isAtSameMomentAs(activity.endDate));
 
     return DataTable(
       border: TableBorder.all(color: Colors.grey),
@@ -232,7 +239,8 @@ class _WeekTimetableState extends State<WeekTimetable> {
           DataRow(cells: [
             DataCell(Text(time.format(context))),
             for (final day in daysOfWeek)
-              DataCell(SizedBox(
+              DataCell(Container(
+                alignment: Alignment.center,
                 width: 55,
                 child: Text(
                   maxLines: 3,
@@ -253,7 +261,7 @@ class _WeekTimetableState extends State<WeekTimetable> {
 
   Widget buildDailyTimetable() {
     final now = DateTime.now();
-    final activeActivities = activities.where((activity) =>
+    final activeActivities = myActivities.where((activity) =>
         now.isAfter(activity.startDate) && now.isBefore(activity.endDate));
 
     final currentDay = [_currentText];
@@ -269,11 +277,12 @@ class _WeekTimetableState extends State<WeekTimetable> {
           DataRow(cells: [
             DataCell(Text(time.format(context))),
             for (final day in currentDay)
-              DataCell(SizedBox(
-                width: 55,
+              DataCell(Container(
+                width: 160,
+                alignment: Alignment.center,
                 child: Text(
                   maxLines: 3,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 14),
                   overflow: TextOverflow.ellipsis,
                   activeActivities
                       .where((activity) =>

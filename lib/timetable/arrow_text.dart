@@ -36,16 +36,18 @@ class _ArrowTextWidgetState extends State<ArrowTextWidget> {
         IconButton(
           onPressed: _decrementIndex,
           icon: Icon(Icons.arrow_left),
+          color: Colors.indigoAccent,
         ),
         SizedBox(width: 16.0),
         Text(
           widget.texts[_index],
-          style: TextStyle(fontSize: 18.0),
+          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
         ),
         SizedBox(width: 16.0),
         IconButton(
           onPressed: _incrementIndex,
           icon: Icon(Icons.arrow_right),
+          color: Colors.indigoAccent,
         ),
       ],
     );
