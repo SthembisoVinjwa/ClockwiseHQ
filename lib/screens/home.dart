@@ -3,7 +3,6 @@ import 'package:clockwisehq/screens/manage_timetable.dart';
 import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import '../file_handling.dart';
 import '../timetable/activity.dart';
 
@@ -75,37 +74,66 @@ class _HomeState extends State<Home> {
     return "$day/$month/$year";
   }
 
-  Widget timetableForDay(DateTime day) {
-    String title = '';
+  List<Widget> tasks(DateTime day) {
+    List<Activity> activities = myActivities
+        .where((activity) =>
+            day.isAfter(activity.startDate) && day.isBefore(activity.endDate) ||
+            day.isAtSameMomentAs(activity.startDate) ||
+            day.isAtSameMomentAs(activity.endDate))
+        .toList();
 
+    List<Widget> widgets = [];
+    bool atleastOne = false;
+
+    if (activities.isEmpty) {
+      widgets.add(const SizedBox(
+        width: 300,
+        child: ListTile(
+          leading: Icon(Icons.calendar_today),
+          title: Text("No class"),
+        ),
+      ));
+    } else {
+      for (final time in timesOfDay) {
+        String title = activities
+            .where((activity) =>
+                activity.daysOfWeek.contains(daysOfWeek[day.weekday - 1]) &&
+                activity.times.contains(time))
+            .map((activity) => activity.title)
+            .join('\n');
+        if (title.isNotEmpty) {
+          atleastOne = true;
+          widgets.add(SizedBox(
+            width: 300,
+            child: ListTile(
+              leading: const Icon(Icons.calendar_today_sharp, size: 24),
+              title: Text(title),
+              subtitle: Text(
+                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+              ),
+            ),
+          ));
+        }
+      }
+      if (atleastOne == false) {
+        widgets.add(const SizedBox(
+          width: 300,
+          child: ListTile(
+            leading: Icon(Icons.free_cancellation_sharp, size: 27.0),
+            title: Text('No classes/events'),
+          ),
+        ));
+      }
+    }
+    return widgets;
+  }
+
+  Widget timetableForDay(DateTime day) {
     return ListView(
       controller: scrollController,
       scrollDirection: Axis.horizontal,
       shrinkWrap: true,
-      children: [
-        for (final time in timesOfDay)
-          if (myActivities
-              .where((activity) =>
-                  day.isAfter(activity.startDate) &&
-                      day.isBefore(activity.endDate) ||
-                  day.isAtSameMomentAs(activity.startDate) ||
-                  day.isAtSameMomentAs(activity.endDate))
-              .where((activity) =>
-                  activity.daysOfWeek.contains(daysOfWeek[day.weekday - 1]) &&
-                  activity.times.contains(time))
-              .map((activity) => title = activity.title)
-              .join('\n')
-              .isNotEmpty)
-            SizedBox(
-              width: 300,
-              child: ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: Text(title),
-                subtitle: Text(
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
-              ),
-            ),
-      ],
+      children: tasks(day),
     );
   }
 
@@ -275,12 +303,12 @@ class _HomeState extends State<Home> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
-                                padding: EdgeInsets.only(bottom: 2, top: 8),
+                                padding:
+                                    const EdgeInsets.only(bottom: 2, top: 8),
                                 child: Center(
                                   child: Text(
-                                    'Classes and Events: ' +
-                                        formatDate(_focusedDay),
-                                    style: TextStyle(
+                                    'Classes and Events: ${formatDate(_focusedDay)}',
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16.0,
                                     ),
