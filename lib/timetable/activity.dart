@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:clockwisehq/file_handling.dart';
 import 'package:flutter/material.dart';
 
 class Activity {
@@ -7,24 +8,26 @@ class Activity {
   String instructor = '';
   late List<TimeOfDay> times;
   late List<String> daysOfWeek;
+  late String type;
   late DateTime startDate;
   late DateTime endDate;
 
   Activity(this.title, this.location, this.instructor, this.times,
-      this.daysOfWeek, this.startDate, this.endDate);
+      this.daysOfWeek, this.type, this.startDate, this.endDate);
 
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       json['title'],
       json['location'],
       json['instructor'],
-      List<TimeOfDay>.from(json['times'].map((time) {
+      List<TimeOfDay>.from(json['times'].map((time) { //Time for event
         final timeParts = time.split(':');
         return TimeOfDay(
             hour: int.parse(timeParts[0]), minute: int.parse(timeParts[1]));
       })),
       List<String>.from(json['daysOfWeek']),
-      DateTime.parse(json['startDate']),
+      json['type'],
+      DateTime.parse(json['startDate']), // Date for event
       DateTime.parse(json['endDate']),
     );
   }
@@ -43,6 +46,7 @@ class ActivityEncoder extends Converter<Activity, String> {
           .map((time) => _timeOfDayFormatter.format(time))
           .toList(),
       'daysOfWeek': activity.daysOfWeek,
+      'type': activity.type,
       'startDate': activity.startDate.toIso8601String(),
       'endDate': activity.endDate.toIso8601String(),
     };
@@ -66,6 +70,7 @@ void main() {
       'Dr. Gray',
       [const TimeOfDay(hour: 10, minute: 0)],
       ['Mon', 'Wed', 'Fri'],
+      'class',
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
     ),
@@ -75,9 +80,11 @@ void main() {
       'Willem Bester',
       [
         const TimeOfDay(hour: 9, minute: 0),
-        const TimeOfDay(hour: 10, minute: 0)
+        const TimeOfDay(hour: 10, minute: 0),
+        const TimeOfDay(hour: 14, minute: 0)
       ],
       ['Tue', 'Thu'],
+      'class',
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
     ),
@@ -90,14 +97,15 @@ void main() {
         const TimeOfDay(hour: 20, minute: 0)
       ],
       ['Mon', 'Wed'],
+      'class',
       DateTime(2023, 4, 1),
       DateTime(2023, 4, 30),
     ),
   ];
 
+  TimetableFile().saveActivities(activities);
+
   final json = activities.map((e) => ActivityEncoder().convert(e)).toList();
   final List<Activity> myActivities =
       json.map((e) => Activity.fromJson(jsonDecode(e))).toList();
-
-  print(myActivities);
 }

@@ -1,4 +1,5 @@
 import 'package:clockwisehq/file_handling.dart';
+import 'package:clockwisehq/timetable/add.dart';
 import 'package:clockwisehq/timetable/arrow_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -118,6 +119,10 @@ class _TimetableState extends State<Timetable> {
           ),
           onPressed: () {
             // Code for navigating to create/manage timetable screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddTask()),
+            );
           },
           child: const Text('Add Class/Event'),
         ),
@@ -219,10 +224,27 @@ class _TimetableState extends State<Timetable> {
 
   Widget buildWeeklyTable() {
     final now = DateTime.now();
-    final activeActivities = myActivities.where((activity) =>
-        now.isAfter(activity.startDate) && now.isBefore(activity.endDate) ||
+    int weekDay = now.weekday;
+    DateTime monday = now.subtract(Duration(days: weekDay - 1));
+    DateTime sunday = now.add(Duration(days: 7 - weekDay));
+    List<Activity> activeActivities = myActivities.where((activity) =>
+        activity.type == 'class' &&
+            now.isAfter(activity.startDate) &&
+            now.isBefore(activity.endDate) ||
         now.isAtSameMomentAs(activity.startDate) ||
-        now.isAtSameMomentAs(activity.endDate));
+        now.isAtSameMomentAs(activity.endDate)).toList();
+
+    final events = myActivities.where((activity) =>
+        activity.type == 'event' &&
+        (activity.startDate.isAtSameMomentAs(monday) ||
+            activity.startDate.isAtSameMomentAs(monday) ||
+            (activity.startDate.isAfter(monday) &&
+                activity.startDate.isBefore(sunday))));
+
+    for (final event in events) {
+      event.daysOfWeek = [daysOfWeek[event.startDate.weekday - 1]];
+      activeActivities.add(event);
+    }
 
     return DataTable(
       border: TableBorder.all(color: Colors.grey),
@@ -261,8 +283,27 @@ class _TimetableState extends State<Timetable> {
 
   Widget buildDailyTimetable() {
     final now = DateTime.now();
-    final activeActivities = myActivities.where((activity) =>
-        now.isAfter(activity.startDate) && now.isBefore(activity.endDate));
+    int weekDay = now.weekday;
+    DateTime monday = now.subtract(Duration(days: weekDay - 1));
+    DateTime sunday = now.add(Duration(days: 7 - weekDay));
+    List<Activity> activeActivities = myActivities.where((activity) =>
+    activity.type == 'class' &&
+        now.isAfter(activity.startDate) &&
+        now.isBefore(activity.endDate) ||
+        now.isAtSameMomentAs(activity.startDate) ||
+        now.isAtSameMomentAs(activity.endDate)).toList();
+
+    final events = myActivities.where((activity) =>
+    activity.type == 'event' &&
+        (activity.startDate.isAtSameMomentAs(monday) ||
+            activity.startDate.isAtSameMomentAs(monday) ||
+            (activity.startDate.isAfter(monday) &&
+                activity.startDate.isBefore(sunday))));
+
+    for (final event in events) {
+      event.daysOfWeek = [daysOfWeek[event.startDate.weekday - 1]];
+      activeActivities.add(event);
+    }
 
     final currentDay = [_currentText];
 

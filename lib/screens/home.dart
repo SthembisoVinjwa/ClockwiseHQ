@@ -82,6 +82,12 @@ class _HomeState extends State<Home> {
             day.isAtSameMomentAs(activity.endDate))
         .toList();
 
+    for (int i = 0; i < activities.length; i++) {
+      if (activities[i].daysOfWeek.contains("x")) {
+        activities[i].daysOfWeek = [daysOfWeek[activities[i].startDate.weekday - 1]];
+      }
+    }
+
     List<Widget> widgets = [];
     bool atleastOne = false;
 
@@ -137,9 +143,62 @@ class _HomeState extends State<Home> {
     );
   }
 
+  final List<Activity> activities = [
+    Activity(
+      'Maths 244',
+      'Jan Mouton',
+      'Dr. Gray',
+      [const TimeOfDay(hour: 10, minute: 0)],
+      ['Mon', 'Wed', 'Fri'],
+      'class',
+      DateTime(2023, 4, 1),
+      DateTime(2023, 4, 30),
+    ),
+    Activity(
+      'Com Sci 344',
+      'Enginerring building room A303',
+      'Willem Bester',
+      [
+        const TimeOfDay(hour: 9, minute: 0),
+        const TimeOfDay(hour: 10, minute: 0),
+        const TimeOfDay(hour: 14, minute: 0)
+      ],
+      ['Tue', 'Thu'],
+      'class',
+      DateTime(2023, 4, 1),
+      DateTime(2023, 4, 30),
+    ),
+    Activity(
+      'GIT 312',
+      'Geology Building',
+      'Dr. Stuurman',
+      [
+        const TimeOfDay(hour: 19, minute: 0),
+        const TimeOfDay(hour: 20, minute: 0)
+      ],
+      ['Mon', 'Wed'],
+      'class',
+      DateTime(2023, 4, 1),
+      DateTime(2023, 4, 30),
+    ),
+    Activity(
+      'GTH 302',
+      'Geology Building',
+      'Dr. Stuurman',
+      [
+        const TimeOfDay(hour: 19, minute: 0),
+      ],
+      ['x'],
+      'event',
+      DateTime(2023, 4, 25),
+      DateTime(2023, 4, 30),
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
+    TimetableFile().saveActivities(activities);
     _readActivities();
   }
 

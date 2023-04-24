@@ -32,6 +32,7 @@ class TimetableFile {
     final String jsonData = await jsonFile.readAsString();
     String withSB = jsonData.replaceFirst('(', '[');
     withSB = withSB.replaceFirst(')', ']');
+    print(withSB);
     final List<dynamic> jsonList = json.decode(withSB);
     final List<Activity> activities = jsonList.map((e) => Activity.fromJson(e)).toList();
     return activities;
