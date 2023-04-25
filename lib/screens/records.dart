@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class MarkingRecords extends StatefulWidget {
-  const MarkingRecords({Key? key}) : super(key: key);
+class AttendanceRecords extends StatefulWidget {
+  const AttendanceRecords({Key? key}) : super(key: key);
 
   @override
-  State<MarkingRecords> createState() => _MarkingRecordsState();
+  State<AttendanceRecords> createState() => _AttendanceRecordsState();
 }
 
-class _MarkingRecordsState extends State<MarkingRecords> {
+class _AttendanceRecordsState extends State<AttendanceRecords> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +22,7 @@ class _MarkingRecordsState extends State<MarkingRecords> {
             },
           ),
           title: const Text(
-            "Attendance Records and Marking",
+            "Attendance Records",
             style: TextStyle(
               fontSize: 18.0,
             ),

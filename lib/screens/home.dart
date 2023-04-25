@@ -1,10 +1,11 @@
-import 'package:clockwisehq/screens/marking_and_records.dart';
-import 'package:clockwisehq/screens/manage_timetable.dart';
+import 'package:clockwisehq/screens/records.dart';
+import 'package:clockwisehq/screens/marking.dart';
 import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../file_handling.dart';
 import '../timetable/activity.dart';
+import '../timetable/timetable.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -231,10 +232,15 @@ class _HomeState extends State<Home> {
               ),
               ListTile(
                 leading: const Icon(Icons.calendar_today),
-                title: const Text('Manage timetable'),
+                title: const Text('View timetable'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to schedule page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ViewTimetable()),
+                  );
                 },
               ),
               ListTile(
@@ -255,8 +261,8 @@ class _HomeState extends State<Home> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('Help'),
+                leading: const Icon(Icons.info),
+                title: const Text('About'),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to help page
@@ -347,7 +353,7 @@ class _HomeState extends State<Home> {
                         lastDay: DateTime.utc(2030, 10, 16),
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 20),
                     Expanded(
                       child: SizedBox(
                         width: 320,
@@ -418,8 +424,9 @@ class _HomeState extends State<Home> {
               child: Container(
                 color: Colors.white,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
+                    SizedBox(height: 30,),
                     SizedBox(
                       width: 250,
                       height: 40,
@@ -465,10 +472,10 @@ class _HomeState extends State<Home> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const ManageTimetables()),
+                                builder: (context) => const AttendanceMarking()),
                           );
                         },
-                        child: const Text('Manage and Share Timetables'),
+                        child: const Text('Attendance Marking'),
                       ),
                     ),
                     const SizedBox(
@@ -492,10 +499,10 @@ class _HomeState extends State<Home> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const MarkingRecords()),
+                                builder: (context) => const AttendanceRecords()),
                           );
                         },
-                        child: const Text('Attendance Records and Marking'),
+                        child: const Text('Attendance Records'),
                       ),
                     ),
                     const SizedBox(

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ManageTimetables extends StatefulWidget {
-  const ManageTimetables({Key? key}) : super(key: key);
+class AttendanceMarking extends StatefulWidget {
+  const AttendanceMarking({Key? key}) : super(key: key);
 
   @override
-  State<ManageTimetables> createState() => _ManageTimetablesState();
+  State<AttendanceMarking> createState() => _AttendanceMarkingState();
 }
 
-class _ManageTimetablesState extends State<ManageTimetables> {
+class _AttendanceMarkingState extends State<AttendanceMarking> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +22,7 @@ class _ManageTimetablesState extends State<ManageTimetables> {
             },
           ),
           title: const Text(
-            "Manage and Share",
+            "Attendance Marking",
             style: TextStyle(
               fontSize: 18.0,
             ),
