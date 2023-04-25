@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../file_handling.dart';
 import '../timetable/activity.dart';
-import '../timetable/timetable.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -211,14 +210,23 @@ class _HomeState extends State<Home> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              UserAccountsDrawerHeader(
-                accountName: const Text('Sthembiso Vinjwa'),
-                accountEmail: const Text('vinjwa@email.com'),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.grey[600],
-                  child: const Text(
-                    'SV',
-                    style: TextStyle(color: Colors.white),
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.indigoAccent,
+                ),
+                child: Container(
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.access_time_filled_outlined, color: Colors.white),
+                      Text(
+                        'ClockwiseHQ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -350,10 +358,10 @@ class _HomeState extends State<Home> {
                             formatButtonVisible: false, titleCentered: true),
                         focusedDay: _focusedDay,
                         firstDay: DateTime.utc(2010, 10, 16),
-                        lastDay: DateTime.utc(2030, 10, 16),
+                        lastDay: DateTime.utc(2090, 10, 16),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
                     Expanded(
                       child: SizedBox(
                         width: 320,
@@ -394,7 +402,7 @@ class _HomeState extends State<Home> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.arrow_back),
+                                    icon: const Icon(Icons.arrow_back_ios),
                                     onPressed: () {
                                       scrollToPrev();
                                     },
@@ -403,7 +411,7 @@ class _HomeState extends State<Home> {
                                     width: 50,
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.arrow_forward),
+                                    icon: const Icon(Icons.arrow_forward_ios),
                                     onPressed: () {
                                       scrollToNext();
                                     },
