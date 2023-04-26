@@ -16,7 +16,7 @@ class _AttendanceMarkingState extends State<AttendanceMarking> {
         child: AppBar(
           elevation: 1.0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
               Navigator.of(context).pop();
             },

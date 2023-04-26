@@ -1,6 +1,10 @@
 import 'package:clockwisehq/components/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
 class AddTask extends StatefulWidget {
   const AddTask({Key? key}) : super(key: key);
@@ -29,6 +33,42 @@ class _AddTaskState extends State<AddTask> {
     ),
   ];
 
+  List<MultiSelectItem<String>> daysOfWeek = [
+    MultiSelectItem('Mon', 'Mon'),
+    MultiSelectItem('Tue', 'Tue'),
+    MultiSelectItem('Wed', 'Wed'),
+    MultiSelectItem('Thu', 'Thu'),
+    MultiSelectItem('Fri', 'Fri'),
+    MultiSelectItem('Sat', 'Sat'),
+    MultiSelectItem('Sun', 'Sun'),
+  ];
+
+  static const timesOfDay = [
+    TimeOfDay(hour: 7, minute: 0),
+    TimeOfDay(hour: 8, minute: 0),
+    TimeOfDay(hour: 9, minute: 0),
+    TimeOfDay(hour: 10, minute: 0),
+    TimeOfDay(hour: 11, minute: 0),
+    TimeOfDay(hour: 12, minute: 0),
+    TimeOfDay(hour: 13, minute: 0),
+    TimeOfDay(hour: 14, minute: 0),
+    TimeOfDay(hour: 15, minute: 0),
+    TimeOfDay(hour: 16, minute: 0),
+    TimeOfDay(hour: 17, minute: 0),
+    TimeOfDay(hour: 18, minute: 0),
+    TimeOfDay(hour: 19, minute: 0),
+    TimeOfDay(hour: 20, minute: 0),
+    TimeOfDay(hour: 21, minute: 0),
+    TimeOfDay(hour: 22, minute: 0),
+  ];
+
+  List<MultiSelectItem<String>> times = timesOfDay
+      .map((e) => MultiSelectItem('${e.hour}:00', '${e.hour}:00'))
+      .toList();
+
+  List<String> selectedDays = [];
+  List<String> selectedTimes = [];
+
   @override
   Widget build(BuildContext context) {
     if (set == false) {
@@ -36,6 +76,7 @@ class _AddTaskState extends State<AddTask> {
       set = true;
     }
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
@@ -55,20 +96,25 @@ class _AddTaskState extends State<AddTask> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.all(5.0),
-        child: Form(
+          padding: const EdgeInsets.all(5.0),
+          child: Form(
             key: _formKey,
             child: Column(
               children: <Widget>[
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
-                  children: [
-                    SizedBox(width: 15,),
-                    const Text('Title', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Title',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 MyTextField(
                   controller: titleController,
                   obscureText: false,
@@ -81,48 +127,51 @@ class _AddTaskState extends State<AddTask> {
                     }
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
                   children: const [
-                    SizedBox(width: 15,),
-                    Text('Type', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Type',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.only(right: 15, left: 15),
-                  height: 60,
+                  height: 45,
                   child: DropdownButtonFormField(
                     decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(5),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey, width: 1.5),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 1.5),
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey, width: 1.5),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 1.5),
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey, width: 1.5),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 1.5),
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         ),
                         focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.grey, width: 1.5),
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 1.5),
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         ),
                         filled: true,
                         fillColor: Colors.white),
                     items: items,
                     iconEnabledColor: Colors.indigoAccent,
-                    style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16.0
-                    ),
+                    style: const TextStyle(color: Colors.grey, fontSize: 16.0),
                     value: _dropdownValue,
                     onChanged: (String? value) {
                       if (value is String) {
@@ -133,15 +182,20 @@ class _AddTaskState extends State<AddTask> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
-                  children: [
-                    SizedBox(width: 15,),
-                    const Text('Venue', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Venue',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 MyTextField(
                   controller: locationController,
                   obscureText: false,
@@ -154,15 +208,20 @@ class _AddTaskState extends State<AddTask> {
                     }
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
-                  children: [
-                    SizedBox(width: 15,),
-                    const Text('Instructor', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Instructor',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 MyTextField(
                   controller: instructorController,
                   obscureText: false,
@@ -175,141 +234,232 @@ class _AddTaskState extends State<AddTask> {
                     }
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
-                  children: [
-                    SizedBox(width: 15,),
-                    const Text('Start Date', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
-                    SizedBox(width: 102,),
-                    const Text('End Date', style: TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    SizedBox(width: 15,),
-                    Container(
-                      width: 160,
-                      child: TextFormField(
-                        onTap: () async {
-                          DateTime? selectedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.utc(2010, 10, 16),
-                              lastDate: DateTime.utc(2090, 10, 16));
-                          if (selectedDate != null) {
-                            setState(() {
-                              startDateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-                            });
-                          }
-                        },
-                        cursorColor: Colors.indigoAccent,
-                        style: TextStyle(color: Colors.grey),
-                        controller: startDateController,
-                        decoration: const InputDecoration(
-                          icon: Icon(Icons.calendar_today_sharp),
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                          ),
-                          hintText: 'yyyy-MM-dd',
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                        ),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Start Date',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(width: 25,),
-                    Container(
-                      width: 160,
-                      child: TextFormField(
-                        onTap: () async {
-                          DateTime? selectedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.utc(2010, 10, 16),
-                              lastDate: DateTime.utc(2090, 10, 16));
-                          if (selectedDate != null) {
-                            setState(() {
-                              endDateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-                            });
-                          }
-                        },
-                        cursorColor: Colors.indigoAccent,
-                        style: TextStyle(color: Colors.grey),
-                        controller: endDateController,
-                        decoration: const InputDecoration(
-                          icon: Icon(Icons.calendar_today_sharp),
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                          ),
-                          hintText: 'yyyy-MM-dd',
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey,
-                                width: 1.5),
-                            borderRadius: BorderRadius.all(Radius.circular(
-                                10.0)),
-                          ),
-                        ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 107),
+                      child: Text(
+                        'End Date',
+                        style: TextStyle(
+                            fontSize: 17.0, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                /*ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15),
+                      child: SizedBox(
+                        width: 160,
+                        height: 45,
+                        child: TextFormField(
+                          onTap: () async {
+                            DateTime? selectedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.utc(2010, 10, 16),
+                                lastDate: DateTime.utc(2090, 10, 16));
+                            if (selectedDate != null) {
+                              setState(() {
+                                startDateController.text =
+                                    DateFormat('yyyy-mm-dd')
+                                        .format(selectedDate);
+                              });
+                            }
+                          },
+                          cursorColor: Colors.indigoAccent,
+                          style: const TextStyle(color: Colors.grey),
+                          controller: startDateController,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(5),
+                            icon: Icon(Icons.calendar_today_sharp),
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                            ),
+                            hintText: 'yyyy-mm-dd',
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 25),
+                      child: SizedBox(
+                        width: 160,
+                        height: 45,
+                        child: TextFormField(
+                          onTap: () async {
+                            DateTime? selectedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.utc(2010, 10, 16),
+                                lastDate: DateTime.utc(2090, 10, 16));
+                            if (selectedDate != null) {
+                              setState(() {
+                                endDateController.text =
+                                    DateFormat('yyyy-MM-dd')
+                                        .format(selectedDate);
+                              });
+                            }
+                          },
+                          cursorColor: Colors.indigoAccent,
+                          style: const TextStyle(color: Colors.grey),
+                          controller: endDateController,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(5),
+                            icon: Icon(Icons.calendar_today_sharp),
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                            ),
+                            hintText: 'yyyy-MM-dd',
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 13),
+                  child: MultiSelectBottomSheetField(
+                    selectedColor: Colors.indigoAccent.withOpacity(0.4),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(10.0)),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.5,
+                      ),
+                    ),
+                    initialChildSize: 0.4,
+                    listType: MultiSelectListType.CHIP,
+                    searchable: true,
+                    buttonText: const Text("Days of the week",
+                        style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    title: const Text(
+                      "Days",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    items: daysOfWeek,
+                    onConfirm: (values) {
+                      selectedDays = values.map((e) => e.toString()).toList();
+                    },
+                    chipDisplay: MultiSelectChipDisplay.none(),
                   ),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  child: MultiSelectBottomSheetField(
+                    selectedColor: Colors.indigoAccent.withOpacity(0.4),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(10.0)),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.5,
+                      ),
+                    ),
+                    initialChildSize: 0.4,
+                    listType: MultiSelectListType.CHIP,
+                    searchable: true,
+                    buttonText: const Text("Times",
+                        style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    title: const Text(
+                      "Times",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    items: times,
+                    onConfirm: (values) {
+                      selectedTimes = values.map((e) => e.toString()).toList();
+                    },
+                    chipDisplay: MultiSelectChipDisplay.none(),
+                  ),
+                ),
+                SizedBox(height: 16,),
+                SizedBox(
+                  height: 40,
+                  width: 100,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.indigoAccent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ), // Text color
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
 
-                    }
-                  },
-                  child: Text('Register'),
-                ),*/
+                      }
+                    },
+                    child: Text('Save', style: TextStyle(fontSize: 16),),
+                  ),
+                ),
               ],
-            )
-        ),
-      ),
+            ),
+          )),
     );
   }
 }
