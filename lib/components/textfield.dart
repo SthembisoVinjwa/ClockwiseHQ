@@ -19,10 +19,11 @@ class MyTextField extends StatelessWidget {
         child: TextFormField(
           validator: validateField,
           cursorColor: Colors.indigoAccent,
-          style: const TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.black),
           controller: controller,
           obscureText: obscureText,
           decoration: InputDecoration(
+            errorStyle: const TextStyle(color: Colors.indigoAccent),
             contentPadding: const EdgeInsets.all(5),
             hintStyle: const TextStyle(
               color: Colors.grey,

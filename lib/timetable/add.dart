@@ -115,19 +115,22 @@ class _AddTaskState extends State<AddTask> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                MyTextField(
-                  controller: titleController,
-                  obscureText: false,
-                  hintText: 'Class/event title',
-                  validateField: (String? password) {
-                    if (password!.length < 6) {
-                      return 'Password length must be greater than 6';
-                    } else {
-                      return null;
-                    }
-                  },
+                SizedBox(
+                  height: 70,
+                  child: MyTextField(
+                    controller: titleController,
+                    obscureText: false,
+                    hintText: 'Class/event title',
+                    validateField: (String? password) {
+                      if (password!.length < 6) {
+                        return 'Password length must be greater than 6';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
                 Row(
                   children: const [
                     Padding(
@@ -171,7 +174,7 @@ class _AddTaskState extends State<AddTask> {
                         fillColor: Colors.white),
                     items: items,
                     iconEnabledColor: Colors.indigoAccent,
-                    style: const TextStyle(color: Colors.grey, fontSize: 16.0),
+                    style: const TextStyle(color: Colors.black, fontSize: 16.0),
                     value: _dropdownValue,
                     onChanged: (String? value) {
                       if (value is String) {
@@ -182,7 +185,7 @@ class _AddTaskState extends State<AddTask> {
                     },
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 22),
                 Row(
                   children: const [
                     Padding(
@@ -196,19 +199,22 @@ class _AddTaskState extends State<AddTask> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                MyTextField(
-                  controller: locationController,
-                  obscureText: false,
-                  hintText: 'Venue/location name',
-                  validateField: (String? password) {
-                    if (password!.length < 6) {
-                      return 'Password length must be greater than 6';
-                    } else {
-                      return null;
-                    }
-                  },
+                SizedBox(
+                  height: 70,
+                  child: MyTextField(
+                    controller: locationController,
+                    obscureText: false,
+                    hintText: 'Venue/location name',
+                    validateField: (String? password) {
+                      if (password!.length < 6) {
+                        return 'Password length must be greater than 6';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
                 Row(
                   children: const [
                     Padding(
@@ -222,37 +228,41 @@ class _AddTaskState extends State<AddTask> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                MyTextField(
-                  controller: instructorController,
-                  obscureText: false,
-                  hintText: 'Instructor/teacher name',
-                  validateField: (String? password) {
-                    if (password!.length < 6) {
-                      return 'Password length must be greater than 6';
-                    } else {
-                      return null;
-                    }
-                  },
+                SizedBox(
+                  height: 70,
+                  child: MyTextField(
+                    controller: instructorController,
+                    obscureText: false,
+                    hintText: 'Instructor/teacher name',
+                    validateField: (String? password) {
+                      if (password!.length < 6) {
+                        return 'Password length must be greater than 6';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
                 Row(
-                  children: const [
+                  children: [
                     Padding(
-                      padding: EdgeInsets.only(left: 15),
+                      padding: const EdgeInsets.only(left: 15),
                       child: Text(
-                        'Start Date',
-                        style: TextStyle(
+                        _dropdownValue == 'Class' ? 'Start Date' : 'Date',
+                        style: const TextStyle(
                             fontSize: 17.0, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 107),
-                      child: Text(
-                        'End Date',
-                        style: TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                    if (_dropdownValue == 'Class')
+                      const Padding(
+                        padding: EdgeInsets.only(left: 107),
+                        child: Text(
+                          'End Date',
+                          style: TextStyle(
+                              fontSize: 17.0, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -279,9 +289,10 @@ class _AddTaskState extends State<AddTask> {
                             }
                           },
                           cursorColor: Colors.indigoAccent,
-                          style: const TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.black),
                           controller: startDateController,
                           decoration: const InputDecoration(
+                            errorStyle: TextStyle(color: Colors.indigoAccent),
                             contentPadding: EdgeInsets.all(5),
                             icon: Icon(Icons.calendar_today_sharp),
                             hintStyle: TextStyle(
@@ -313,99 +324,127 @@ class _AddTaskState extends State<AddTask> {
                                   BorderRadius.all(Radius.circular(10.0)),
                             ),
                           ),
+                          validator: (String? date) {
+                            if (date!.isEmpty) {
+                              return 'Date is empty';
+                            } else {
+                              if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
+                                  .hasMatch(date)) {
+                                return 'Incorrect date';
+                              }
+                              return null;
+                            }
+                          },
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 25),
-                      child: SizedBox(
-                        width: 160,
-                        height: 45,
-                        child: TextFormField(
-                          onTap: () async {
-                            DateTime? selectedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.utc(2010, 10, 16),
-                                lastDate: DateTime.utc(2090, 10, 16));
-                            if (selectedDate != null) {
-                              setState(() {
-                                endDateController.text =
-                                    DateFormat('yyyy-MM-dd')
-                                        .format(selectedDate);
-                              });
-                            }
-                          },
-                          cursorColor: Colors.indigoAccent,
-                          style: const TextStyle(color: Colors.grey),
-                          controller: endDateController,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.all(5),
-                            icon: Icon(Icons.calendar_today_sharp),
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
+                    if (_dropdownValue == 'Class')
+                      Padding(
+                        padding: const EdgeInsets.only(left: 25),
+                        child: SizedBox(
+                          width: 160,
+                          height: 45,
+                          child: TextFormField(
+                            onTap: () async {
+                              DateTime? selectedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.utc(2010, 10, 16),
+                                  lastDate: DateTime.utc(2090, 10, 16));
+                              if (selectedDate != null) {
+                                setState(() {
+                                  endDateController.text =
+                                      DateFormat('yyyy-MM-dd')
+                                          .format(selectedDate);
+                                });
+                              }
+                            },
+                            cursorColor: Colors.indigoAccent,
+                            style: const TextStyle(color: Colors.black),
+                            controller: endDateController,
+                            decoration: const InputDecoration(
+                              errorStyle: TextStyle(color: Colors.indigoAccent),
+                              contentPadding: EdgeInsets.all(5),
+                              icon: Icon(Icons.calendar_today_sharp),
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                              ),
+                              hintText: 'yyyy-MM-dd',
+                              enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
                             ),
-                            hintText: 'yyyy-MM-dd',
-                            enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.5),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.5),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.5),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.5),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                            ),
+                            validator: (String? date) {
+                              if (date!.isEmpty) {
+                                return 'Date is empty';
+                              } else {
+                                if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
+                                    .hasMatch(date)) {
+                                  return 'Incorrect date';
+                                }
+                                return null;
+                              }
+                            },
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 13),
-                  child: MultiSelectBottomSheetField(
-                    selectedColor: Colors.indigoAccent.withOpacity(0.4),
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(10.0)),
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.5,
+                if (_dropdownValue == 'Class')
+                  const SizedBox(height: 32),
+                if (_dropdownValue == 'Event')
+                  const SizedBox(height: 16),
+                if (_dropdownValue == 'Class')
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15, right: 13),
+                    child: MultiSelectBottomSheetField(
+                      selectedColor: Colors.indigoAccent.withOpacity(0.4),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0)),
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 1.5,
+                        ),
                       ),
+                      initialChildSize: 0.4,
+                      listType: MultiSelectListType.CHIP,
+                      searchable: true,
+                      buttonText: const Text("Days of the week",
+                          style: TextStyle(fontSize: 16, color: Colors.black)),
+                      title: const Text(
+                        "Days",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      items: daysOfWeek,
+                      onConfirm: (values) {
+                        selectedDays = values.map((e) => e.toString()).toList();
+                      },
+                      chipDisplay: MultiSelectChipDisplay.none(),
                     ),
-                    initialChildSize: 0.4,
-                    listType: MultiSelectListType.CHIP,
-                    searchable: true,
-                    buttonText: const Text("Days of the week",
-                        style: TextStyle(fontSize: 16, color: Colors.grey)),
-                    title: const Text(
-                      "Days",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    items: daysOfWeek,
-                    onConfirm: (values) {
-                      selectedDays = values.map((e) => e.toString()).toList();
-                    },
-                    chipDisplay: MultiSelectChipDisplay.none(),
                   ),
-                ),
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15),
@@ -423,10 +462,11 @@ class _AddTaskState extends State<AddTask> {
                     listType: MultiSelectListType.CHIP,
                     searchable: true,
                     buttonText: const Text("Times",
-                        style: TextStyle(fontSize: 16, color: Colors.grey)),
+                        style: TextStyle(fontSize: 16, color: Colors.black)),
                     title: const Text(
                       "Times",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     items: times,
                     onConfirm: (values) {
@@ -435,7 +475,9 @@ class _AddTaskState extends State<AddTask> {
                     chipDisplay: MultiSelectChipDisplay.none(),
                   ),
                 ),
-                SizedBox(height: 16,),
+                const SizedBox(
+                  height: 20,
+                ),
                 SizedBox(
                   height: 40,
                   width: 100,
@@ -450,11 +492,12 @@ class _AddTaskState extends State<AddTask> {
                       ), // Text color
                     ),
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-
-                      }
+                      if (_formKey.currentState!.validate()) {}
                     },
-                    child: Text('Save', style: TextStyle(fontSize: 16),),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
               ],
