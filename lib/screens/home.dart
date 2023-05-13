@@ -1,12 +1,14 @@
 import 'package:clockwisehq/provider/provider.dart';
 import 'package:clockwisehq/screens/records.dart';
 import 'package:clockwisehq/screens/marking.dart';
+import 'package:clockwisehq/screens/settingDialog.dart';
 import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../file_handling.dart';
 import '../timetable/activity.dart';
 import 'package:provider/provider.dart';
+import 'package:clockwisehq/global/global.dart' as global;
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -63,7 +65,7 @@ class _HomeState extends State<Home> {
       _isLoadingActivities = true;
     });
     List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
-    Provider.of<ActivityProvider>(context, listen: false)
+    Provider.of<MainProvider>(context, listen: false)
         .updateActivityList(acts);
     setState(() {
       _isLoadingActivities = false;
@@ -88,7 +90,9 @@ class _HomeState extends State<Home> {
 
     for (int i = 0; i < activities.length; i++) {
       if (activities[i].daysOfWeek.contains("x")) {
-        activities[i].daysOfWeek = [daysOfWeek[activities[i].startDate.weekday - 1]];
+        activities[i].daysOfWeek = [
+          daysOfWeek[activities[i].startDate.weekday - 1]
+        ];
       }
     }
 
@@ -96,11 +100,17 @@ class _HomeState extends State<Home> {
     bool atleastOne = false;
 
     if (activities.isEmpty) {
-      widgets.add(const SizedBox(
+      widgets.add(SizedBox(
         width: 300,
         child: ListTile(
-          leading: Icon(Icons.free_cancellation_sharp),
-          title: Text("No classs/events"),
+          leading: Icon(
+            Icons.free_cancellation_sharp,
+            color: global.cColor,
+          ),
+          title: Text(
+            "No classes/events",
+            style: TextStyle(color: global.aColor),
+          ),
         ),
       ));
     } else {
@@ -116,8 +126,15 @@ class _HomeState extends State<Home> {
           widgets.add(SizedBox(
             width: 300,
             child: ListTile(
-              leading: const Icon(Icons.calendar_today_sharp, size: 24),
-              title: Text(title),
+              leading: Icon(
+                Icons.calendar_today_sharp,
+                size: 24,
+                color: global.cColor,
+              ),
+              title: Text(
+                title,
+                style: TextStyle(color: global.aColor),
+              ),
               subtitle: Text(
                 '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
               ),
@@ -126,11 +143,18 @@ class _HomeState extends State<Home> {
         }
       }
       if (atleastOne == false) {
-        widgets.add(const SizedBox(
+        widgets.add(SizedBox(
           width: 300,
           child: ListTile(
-            leading: Icon(Icons.free_cancellation_sharp, size: 27.0),
-            title: Text('No classes/events'),
+            leading: Icon(
+              Icons.free_cancellation_sharp,
+              size: 27.0,
+              color: global.cColor,
+            ),
+            title: Text(
+              'No classes/events',
+              style: TextStyle(color: global.aColor),
+            ),
           ),
         ));
       }
@@ -207,28 +231,40 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ActivityProvider>(context);
+    final provider = Provider.of<MainProvider>(context);
     myActivities = provider.activityList;
 
+    if (provider.isDarkMode == true) {
+      global.aColor = Colors.white;
+      global.bColor = Colors.black87;
+    } else {
+      global.bColor = Colors.white;
+      global.aColor = Colors.black87;
+    }
+
     return Scaffold(
-        backgroundColor: const Color(0xfffdffff),
+        backgroundColor: global.bColor,
         drawer: Drawer(
+          backgroundColor: global.bColor,
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.black,
+                decoration: BoxDecoration(
+                  color: global.aColor,
                 ),
                 child: Container(
                   alignment: Alignment.topLeft,
                   child: Row(
-                    children: const [
-                      Icon(Icons.access_time_filled_outlined, color: Colors.white),
+                    children: [
+                      Icon(
+                        Icons.access_time_filled_outlined,
+                        color: global.bColor,
+                      ),
                       Text(
                         'ClockwiseHQ',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: global.bColor,
                           fontSize: 22.0,
                         ),
                       ),
@@ -237,16 +273,32 @@ class _HomeState extends State<Home> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Home'),
+                leading: Icon(
+                  Icons.home,
+                  color: global.cColor,
+                ),
+                title: Text(
+                  'Home',
+                  style: TextStyle(
+                    color: global.aColor,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to home page
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('View timetable'),
+                leading: Icon(
+                  Icons.calendar_today,
+                  color: global.cColor,
+                ),
+                title: Text(
+                  'View timetable',
+                  style: TextStyle(
+                    color: global.aColor,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to schedule page
@@ -258,8 +310,16 @@ class _HomeState extends State<Home> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.assignment),
-                title: const Text('Attendance Records'),
+                leading: Icon(
+                  Icons.assignment,
+                  color: global.cColor,
+                ),
+                title: Text(
+                  'Attendance Records',
+                  style: TextStyle(
+                    color: global.aColor,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to attendance records page
@@ -267,16 +327,32 @@ class _HomeState extends State<Home> {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
+                leading: Icon(
+                  Icons.settings,
+                  color: global.cColor,
+                ),
+                title: Text(
+                  'Settings',
+                  style: TextStyle(
+                    color: global.aColor,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to settings page
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text('About'),
+                leading: Icon(
+                  Icons.info,
+                  color: global.cColor,
+                ),
+                title: Text(
+                  'About',
+                  style: TextStyle(
+                    color: global.aColor,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to help page
@@ -288,15 +364,18 @@ class _HomeState extends State<Home> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: AppBar(
+            backgroundColor: global.bColor,
+            iconTheme: IconThemeData(color: global.aColor),
             elevation: 1.0,
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.access_time_filled_outlined),
+              children: [
+                Icon(Icons.access_time_filled_outlined, color: global.aColor,),
                 Text(
                   "ClockwiseHQ",
                   style: TextStyle(
                     fontSize: 18.0,
+                    color: global.aColor,
                   ),
                 ),
               ],
@@ -304,12 +383,31 @@ class _HomeState extends State<Home> {
             centerTitle: true,
             actions: [
               IconButton(
-                icon: const Icon(Icons.notifications_none_sharp, size: 25.0),
+                icon: Icon(
+                  Icons.notifications_none_sharp,
+                  size: 25.0,
+                  color: global.aColor,
+                ),
                 onPressed: () {
                   // Show list of notifications
                   showNotifications(context);
                 },
               ),
+              IconButton(
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 25.0,
+                  color: global.aColor,
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SettingsDialog();
+                    },
+                  );
+                },
+              )
               /*Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: ElevatedButton(
@@ -353,17 +451,40 @@ class _HomeState extends State<Home> {
                             _focusedDay = focusedDay;
                           });
                         },
-                        calendarStyle: const CalendarStyle(
-                          cellMargin: EdgeInsets.all(4),
-                          selectedDecoration: ShapeDecoration(color: Colors.black,shape: CircleBorder()),
-                          todayDecoration: ShapeDecoration(color: Colors.grey,shape: CircleBorder()),
+                        calendarStyle: CalendarStyle(
+                          cellMargin: const EdgeInsets.all(4),
+                          outsideTextStyle: TextStyle(
+                            color: global.cColor,
+                          ),
+                          selectedDecoration: ShapeDecoration(
+                              color: global.aColor,
+                              shape: const CircleBorder()),
+                          todayDecoration: ShapeDecoration(
+                              color: global.cColor,
+                              shape: const CircleBorder()),
+                          selectedTextStyle: TextStyle(
+                            color: global.bColor,
+                          ),
+                          todayTextStyle: TextStyle(
+                            color: global.bColor,
+                          ),
+                          weekNumberTextStyle: TextStyle(color: global.aColor),
+                          weekendTextStyle: TextStyle(color: global.aColor),
+                          defaultTextStyle: TextStyle(color: global.aColor),
                         ),
                         selectedDayPredicate: (day) =>
                             isSameDay(_selectedDay, day),
                         shouldFillViewport: true,
                         availableGestures: AvailableGestures.all,
-                        headerStyle: const HeaderStyle(
-                            formatButtonVisible: false, titleCentered: true),
+                        headerStyle: HeaderStyle(
+                            titleTextStyle:
+                                TextStyle(fontSize: 18, color: global.aColor),
+                            leftChevronIcon: Icon(Icons.arrow_back_ios,
+                                color: global.aColor),
+                            rightChevronIcon: Icon(Icons.arrow_forward_ios,
+                                color: global.aColor),
+                            formatButtonVisible: false,
+                            titleCentered: true),
                         focusedDay: _focusedDay,
                         firstDay: DateTime.utc(2010, 10, 16),
                         lastDay: DateTime.utc(2090, 10, 16),
@@ -374,10 +495,13 @@ class _HomeState extends State<Home> {
                       child: SizedBox(
                         width: 320,
                         child: Card(
+                          color: global.bColor,
                           elevation: 1.0,
                           shape: RoundedRectangleBorder(
-                            side:
-                                BorderSide(width: 1, color: Colors.grey[600]!),
+                            side: BorderSide(
+                              width: 1,
+                              color: global.cColor,
+                            ),
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Column(
@@ -389,19 +513,22 @@ class _HomeState extends State<Home> {
                                 child: Center(
                                   child: Text(
                                     'Classes and Events: ${formatDate(_focusedDay)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                    style: TextStyle(
                                       fontSize: 16.0,
+                                      color: global.aColor,
                                     ),
                                   ),
                                 ),
                               ),
-                              const Divider(thickness: 1.0),
+                              Divider(
+                                thickness: 1.0,
+                                color: global.cColor,
+                              ),
                               Expanded(
                                 child: _isLoadingActivities
-                                    ? const Center(
+                                    ? Center(
                                         child: CircularProgressIndicator(
-                                          color: Colors.black,
+                                          color: global.aColor,
                                         ),
                                       )
                                     : timetableForDay(_focusedDay, context),
@@ -410,13 +537,17 @@ class _HomeState extends State<Home> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.arrow_back_ios),
+                                    icon: Icon(Icons.arrow_back_ios,
+                                        color: global.aColor),
                                     onPressed: () {
                                       scrollToPrev();
                                     },
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.arrow_forward_ios),
+                                    icon: Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: global.aColor,
+                                    ),
                                     onPressed: () {
                                       scrollToNext();
                                     },
@@ -435,22 +566,24 @@ class _HomeState extends State<Home> {
             Expanded(
               flex: 2,
               child: Container(
-                color: Colors.white,
+                color: global.bColor,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    const SizedBox(height: 30,),
+                    const SizedBox(
+                      height: 30,
+                    ),
                     SizedBox(
                       width: 310,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
+                          foregroundColor: global.aColor,
+                          backgroundColor: global.bColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            side: const BorderSide(color: Colors.black),
+                            side: BorderSide(color: global.aColor),
                             borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
@@ -462,7 +595,10 @@ class _HomeState extends State<Home> {
                                 builder: (context) => const ViewTimetable()),
                           );
                         },
-                        child: const Text('View Timetable', style: TextStyle(color: Colors.black),),
+                        child: Text(
+                          'View Timetable',
+                          style: TextStyle(color: global.aColor),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -473,12 +609,12 @@ class _HomeState extends State<Home> {
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
+                          foregroundColor: global.aColor,
+                          backgroundColor: global.bColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black),
+                            side: BorderSide(color: global.aColor),
                             borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
@@ -487,10 +623,14 @@ class _HomeState extends State<Home> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AttendanceMarking()),
+                                builder: (context) =>
+                                    const AttendanceMarking()),
                           );
                         },
-                        child: const Text('Attendance Marking', style: TextStyle(color: Colors.black),),
+                        child: Text(
+                          'Attendance Marking',
+                          style: TextStyle(color: global.aColor),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -501,12 +641,12 @@ class _HomeState extends State<Home> {
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
+                          foregroundColor: global.aColor,
+                          backgroundColor: global.bColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black),
+                            side: BorderSide(color: global.aColor),
                             borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
@@ -515,10 +655,14 @@ class _HomeState extends State<Home> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AttendanceRecords()),
+                                builder: (context) =>
+                                    const AttendanceRecords()),
                           );
                         },
-                        child: const Text('Attendance Records', style: TextStyle(color: Colors.black),),
+                        child: Text(
+                          'Attendance Records',
+                          style: TextStyle(color: global.aColor),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -529,19 +673,22 @@ class _HomeState extends State<Home> {
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
+                          foregroundColor: global.aColor,
+                          backgroundColor: global.bColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black),
+                            side: BorderSide(color: global.aColor),
                             borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
                         },
-                        child: const Text('Settings', style: TextStyle(color: Colors.black),),
+                        child: Text(
+                          'Settings',
+                          style: TextStyle(color: global.aColor),
+                        ),
                       ),
                     ),
                   ],
@@ -557,7 +704,10 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Notifications'),
+          title: Text(
+            'Notifications',
+            style: TextStyle(fontSize: 18, color: global.aColor),
+          ),
           content: SizedBox(
             width: double.maxFinite,
             height: 200,
@@ -565,16 +715,23 @@ class _HomeState extends State<Home> {
               itemCount: 10,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  leading: const Icon(Icons.notifications),
-                  title: Text('Notification ${index + 1}'),
-                  subtitle: const Text('This is a notification'),
+                  leading: Icon(
+                    Icons.notifications,
+                    color: global.cColor,
+                  ),
+                  title: Text(
+                    'Notification ${index + 1}',
+                    style: TextStyle(color: global.aColor),
+                  ),
+                  subtitle: Text('This is a notification',
+                      style: TextStyle(color: global.cColor)),
                 );
               },
             ),
           ),
           actions: [
             TextButton(
-              child: const Text('OK'),
+              child: Text('OK', style: TextStyle(color: global.aColor)),
               onPressed: () {
                 Navigator.of(context).pop();
               },

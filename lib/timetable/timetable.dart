@@ -85,7 +85,7 @@ class _TimetableState extends State<Timetable> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ActivityProvider>(context);
+    final provider = Provider.of<MainProvider>(context);
     myActivities = provider.activityList;
 
     if (set == false) {

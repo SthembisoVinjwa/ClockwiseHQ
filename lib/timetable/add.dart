@@ -533,12 +533,12 @@ class _AddTaskState extends State<AddTask> {
                             DateTime.parse(endDateController.text),
                           );
                           List<Activity> activities =
-                              Provider.of<ActivityProvider>(context,
+                              Provider.of<MainProvider>(context,
                                       listen: false)
                                   .activityList;
                           activities.add(activity);
                           await TimetableFile().saveActivities(activities);
-                          Provider.of<ActivityProvider>(context, listen: false)
+                          Provider.of<MainProvider>(context, listen: false)
                               .updateActivityList(activities);
                         } else {
                           activity = Activity(

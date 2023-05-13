@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'screens/home.dart';
+import 'package:clockwisehq/global/global.dart' as global;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,15 +16,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ActivityProvider>(
-      create: (context) => ActivityProvider(),
+    return ChangeNotifierProvider<MainProvider>(
+      create: (context) => MainProvider(),
       child: MaterialApp(
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: Colors.black,
-            secondary: Colors.white,
-          ),
-        ),
         debugShowCheckedModeBanner: false,
         home: const Home(),
       ),
