@@ -1,10 +1,15 @@
 import 'package:clockwisehq/components/textfield.dart';
+import 'package:clockwisehq/file_handling.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/provider.dart';
+import 'activity.dart';
 
 class AddTask extends StatefulWidget {
   const AddTask({Key? key}) : super(key: key);
@@ -21,6 +26,8 @@ class _AddTaskState extends State<AddTask> {
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
   String? _dropdownValue;
+  bool timeError = false;
+  bool dayError = false;
   bool set = false;
   List<DropdownMenuItem<String>> items = const [
     DropdownMenuItem(
@@ -121,9 +128,9 @@ class _AddTaskState extends State<AddTask> {
                     controller: titleController,
                     obscureText: false,
                     hintText: 'Class/event title',
-                    validateField: (String? password) {
-                      if (password!.length < 6) {
-                        return 'Password length must be greater than 6';
+                    validateField: (String? title) {
+                      if (title!.isEmpty) {
+                        return 'Title is empty';
                       } else {
                         return null;
                       }
@@ -173,7 +180,7 @@ class _AddTaskState extends State<AddTask> {
                         filled: true,
                         fillColor: Colors.white),
                     items: items,
-                    iconEnabledColor: Colors.indigoAccent,
+                    iconEnabledColor: Colors.black,
                     style: const TextStyle(color: Colors.black, fontSize: 16.0),
                     value: _dropdownValue,
                     onChanged: (String? value) {
@@ -205,13 +212,7 @@ class _AddTaskState extends State<AddTask> {
                     controller: locationController,
                     obscureText: false,
                     hintText: 'Venue/location name',
-                    validateField: (String? password) {
-                      if (password!.length < 6) {
-                        return 'Password length must be greater than 6';
-                      } else {
-                        return null;
-                      }
-                    },
+                    validateField: (String? venue) {},
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -234,13 +235,7 @@ class _AddTaskState extends State<AddTask> {
                     controller: instructorController,
                     obscureText: false,
                     hintText: 'Instructor/teacher name',
-                    validateField: (String? password) {
-                      if (password!.length < 6) {
-                        return 'Password length must be greater than 6';
-                      } else {
-                        return null;
-                      }
-                    },
+                    validateField: (String? password) {},
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -288,11 +283,10 @@ class _AddTaskState extends State<AddTask> {
                               });
                             }
                           },
-                          cursorColor: Colors.indigoAccent,
+                          cursorColor: Colors.black,
                           style: const TextStyle(color: Colors.black),
                           controller: startDateController,
                           decoration: const InputDecoration(
-                            errorStyle: TextStyle(color: Colors.indigoAccent),
                             contentPadding: EdgeInsets.all(5),
                             icon: Icon(Icons.calendar_today_sharp),
                             hintStyle: TextStyle(
@@ -330,7 +324,7 @@ class _AddTaskState extends State<AddTask> {
                             } else {
                               if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
                                   .hasMatch(date)) {
-                                return 'Incorrect date';
+                                return 'Invalid date';
                               }
                               return null;
                             }
@@ -359,11 +353,10 @@ class _AddTaskState extends State<AddTask> {
                                 });
                               }
                             },
-                            cursorColor: Colors.indigoAccent,
+                            cursorColor: Colors.black,
                             style: const TextStyle(color: Colors.black),
                             controller: endDateController,
                             decoration: const InputDecoration(
-                              errorStyle: TextStyle(color: Colors.indigoAccent),
                               contentPadding: EdgeInsets.all(5),
                               icon: Icon(Icons.calendar_today_sharp),
                               hintStyle: TextStyle(
@@ -401,7 +394,7 @@ class _AddTaskState extends State<AddTask> {
                               } else {
                                 if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
                                     .hasMatch(date)) {
-                                  return 'Incorrect date';
+                                  return 'Invalid date';
                                 }
                                 return null;
                               }
@@ -411,14 +404,24 @@ class _AddTaskState extends State<AddTask> {
                       ),
                   ],
                 ),
-                if (_dropdownValue == 'Class')
-                  const SizedBox(height: 32),
-                if (_dropdownValue == 'Event')
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
                 if (_dropdownValue == 'Class')
                   Padding(
                     padding: const EdgeInsets.only(left: 15, right: 13),
                     child: MultiSelectBottomSheetField(
+                      validator: (List<dynamic>? value) {
+                        if (value!.isEmpty) {
+                          setState(() {
+                            dayError = true;
+                          });
+                          return 'Select atleast one day';
+                        } else {
+                          setState(() {
+                            dayError = false;
+                          });
+                          return null;
+                        }
+                      },
                       selectedColor: Colors.indigoAccent.withOpacity(0.4),
                       decoration: BoxDecoration(
                         borderRadius:
@@ -431,7 +434,7 @@ class _AddTaskState extends State<AddTask> {
                       initialChildSize: 0.4,
                       listType: MultiSelectListType.CHIP,
                       searchable: true,
-                      buttonText: const Text("Days of the week",
+                      buttonText: const Text("Day(s) of the week",
                           style: TextStyle(fontSize: 16, color: Colors.black)),
                       title: const Text(
                         "Days",
@@ -445,10 +448,24 @@ class _AddTaskState extends State<AddTask> {
                       chipDisplay: MultiSelectChipDisplay.none(),
                     ),
                   ),
-                const SizedBox(height: 16),
+                if (dayError == true) const SizedBox(height: 5),
+                if (dayError == false) const SizedBox(height: 22),
                 Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15),
                   child: MultiSelectBottomSheetField(
+                    validator: (List<dynamic>? value) {
+                      if (value!.isEmpty) {
+                        setState(() {
+                          timeError = true;
+                        });
+                        return 'Select atleast one time';
+                      } else {
+                        setState(() {
+                          timeError = false;
+                        });
+                        return null;
+                      }
+                    },
                     selectedColor: Colors.indigoAccent.withOpacity(0.4),
                     decoration: BoxDecoration(
                       borderRadius:
@@ -461,7 +478,7 @@ class _AddTaskState extends State<AddTask> {
                     initialChildSize: 0.4,
                     listType: MultiSelectListType.CHIP,
                     searchable: true,
-                    buttonText: const Text("Times",
+                    buttonText: const Text("Time(s)",
                         style: TextStyle(fontSize: 16, color: Colors.black)),
                     title: const Text(
                       "Times",
@@ -475,24 +492,76 @@ class _AddTaskState extends State<AddTask> {
                     chipDisplay: MultiSelectChipDisplay.none(),
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                if (timeError == true)
+                  const SizedBox(
+                    height: 5,
+                  ),
+                if (timeError == false)
+                  const SizedBox(
+                    height: 22,
+                  ),
                 SizedBox(
                   height: 40,
                   width: 100,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.indigoAccent,
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(15),
                       ), // Text color
                     ),
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {}
+                      if (_formKey.currentState!.validate()) {
+                        Activity activity;
+                        if (_dropdownValue == 'Class') {
+                          activity = Activity(
+                            titleController.text,
+                            locationController.text,
+                            instructorController.text,
+                            selectedTimes.map((timeString) {
+                              DateTime dateTime =
+                                  DateFormat('HH:mm').parse(timeString);
+                              return TimeOfDay.fromDateTime(dateTime);
+                            }).toList(),
+                            selectedDays,
+                            _dropdownValue!,
+                            DateTime.parse(startDateController.text),
+                            DateTime.parse(endDateController.text),
+                          );
+                          List<Activity> activities =
+                              Provider.of<ActivityProvider>(context,
+                                      listen: false)
+                                  .activityList;
+                          activities.add(activity);
+                          await TimetableFile().saveActivities(activities);
+                          Provider.of<ActivityProvider>(context, listen: false)
+                              .updateActivityList(activities);
+                        } else {
+                          activity = Activity(
+                            titleController.text,
+                            locationController.text,
+                            instructorController.text,
+                            selectedTimes.map((timeString) {
+                              DateTime dateTime =
+                                  DateFormat('HH:mm').parse(timeString);
+                              return TimeOfDay.fromDateTime(dateTime);
+                            }).toList(),
+                            ['x'],
+                            _dropdownValue!,
+                            DateTime.parse(startDateController.text),
+                            DateTime(2090, 4, 30),
+                          );
+                          List<Activity> activities = await TimetableFile()
+                              .readActivitiesFromJsonFile();
+                          activities.add(activity);
+                          await TimetableFile().saveActivities(activities);
+                        }
+                        Navigator.pop(context);
+                      }
                     },
                     child: const Text(
                       'Save',

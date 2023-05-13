@@ -1,3 +1,4 @@
+import 'package:clockwisehq/provider/provider.dart';
 import 'package:clockwisehq/screens/records.dart';
 import 'package:clockwisehq/screens/marking.dart';
 import 'package:clockwisehq/screens/view.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../file_handling.dart';
 import '../timetable/activity.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -60,7 +62,9 @@ class _HomeState extends State<Home> {
     setState(() {
       _isLoadingActivities = true;
     });
-    myActivities = await TimetableFile().readActivitiesFromJsonFile();
+    List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
+    Provider.of<ActivityProvider>(context, listen: false)
+        .updateActivityList(acts);
     setState(() {
       _isLoadingActivities = false;
     });
@@ -95,8 +99,8 @@ class _HomeState extends State<Home> {
       widgets.add(const SizedBox(
         width: 300,
         child: ListTile(
-          leading: Icon(Icons.calendar_today),
-          title: Text("No class"),
+          leading: Icon(Icons.free_cancellation_sharp),
+          title: Text("No classs/events"),
         ),
       ));
     } else {
@@ -134,7 +138,7 @@ class _HomeState extends State<Home> {
     return widgets;
   }
 
-  Widget timetableForDay(DateTime day) {
+  Widget timetableForDay(DateTime day, context) {
     return ListView(
       controller: scrollController,
       scrollDirection: Axis.horizontal,
@@ -143,7 +147,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  final List<Activity> activities = [
+  /*final List<Activity> activities = [
     Activity(
       'Maths 244',
       'Jan Mouton',
@@ -193,17 +197,19 @@ class _HomeState extends State<Home> {
       DateTime(2023, 4, 25),
       DateTime(2023, 4, 30),
     ),
-  ];
+  ];*/
 
   @override
   void initState() {
     super.initState();
-    TimetableFile().saveActivities(activities);
     _readActivities();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ActivityProvider>(context);
+    myActivities = provider.activityList;
+
     return Scaffold(
         backgroundColor: const Color(0xfffdffff),
         drawer: Drawer(
@@ -212,7 +218,7 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               DrawerHeader(
                 decoration: const BoxDecoration(
-                  color: Colors.indigoAccent,
+                  color: Colors.black,
                 ),
                 child: Container(
                   alignment: Alignment.topLeft,
@@ -298,7 +304,7 @@ class _HomeState extends State<Home> {
             centerTitle: true,
             actions: [
               IconButton(
-                icon: const Icon(Icons.notifications_none_sharp, size: 30.0),
+                icon: const Icon(Icons.notifications_none_sharp, size: 25.0),
                 onPressed: () {
                   // Show list of notifications
                   showNotifications(context);
@@ -349,6 +355,8 @@ class _HomeState extends State<Home> {
                         },
                         calendarStyle: const CalendarStyle(
                           cellMargin: EdgeInsets.all(4),
+                          selectedDecoration: ShapeDecoration(color: Colors.black,shape: CircleBorder()),
+                          todayDecoration: ShapeDecoration(color: Colors.grey,shape: CircleBorder()),
                         ),
                         selectedDayPredicate: (day) =>
                             isSameDay(_selectedDay, day),
@@ -393,10 +401,10 @@ class _HomeState extends State<Home> {
                                 child: _isLoadingActivities
                                     ? const Center(
                                         child: CircularProgressIndicator(
-                                          color: Colors.indigoAccent,
+                                          color: Colors.black,
                                         ),
                                       )
-                                    : timetableForDay(_focusedDay),
+                                    : timetableForDay(_focusedDay, context),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -406,9 +414,6 @@ class _HomeState extends State<Home> {
                                     onPressed: () {
                                       scrollToPrev();
                                     },
-                                  ),
-                                  const SizedBox(
-                                    width: 50,
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.arrow_forward_ios),
@@ -434,18 +439,19 @@ class _HomeState extends State<Home> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    SizedBox(height: 30,),
+                    const SizedBox(height: 30,),
                     SizedBox(
-                      width: 250,
+                      width: 310,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            side: const BorderSide(color: Colors.black),
+                            borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
                         onPressed: () {
@@ -456,23 +462,24 @@ class _HomeState extends State<Home> {
                                 builder: (context) => const ViewTimetable()),
                           );
                         },
-                        child: const Text('View Timetable'),
+                        child: const Text('View Timetable', style: TextStyle(color: Colors.black),),
                       ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     SizedBox(
-                      width: 250,
+                      width: 310,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(color: Colors.black),
+                            borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
                         onPressed: () {
@@ -483,23 +490,24 @@ class _HomeState extends State<Home> {
                                 builder: (context) => const AttendanceMarking()),
                           );
                         },
-                        child: const Text('Attendance Marking'),
+                        child: const Text('Attendance Marking', style: TextStyle(color: Colors.black),),
                       ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     SizedBox(
-                      width: 250,
+                      width: 310,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(color: Colors.black),
+                            borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
                         onPressed: () {
@@ -510,29 +518,30 @@ class _HomeState extends State<Home> {
                                 builder: (context) => const AttendanceRecords()),
                           );
                         },
-                        child: const Text('Attendance Records'),
+                        child: const Text('Attendance Records', style: TextStyle(color: Colors.black),),
                       ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     SizedBox(
-                      width: 250,
+                      width: 310,
                       height: 40,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(color: Colors.black),
+                            borderRadius: BorderRadius.circular(15),
                           ), // Text color
                         ),
                         onPressed: () {
                           // Code for navigating to create/manage timetable screen
                         },
-                        child: const Text('Settings'),
+                        child: const Text('Settings', style: TextStyle(color: Colors.black),),
                       ),
                     ),
                   ],

@@ -18,12 +18,11 @@ class MyTextField extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
         child: TextFormField(
           validator: validateField,
-          cursorColor: Colors.indigoAccent,
+          cursorColor: Colors.grey,
           style: const TextStyle(color: Colors.black),
           controller: controller,
           obscureText: obscureText,
           decoration: InputDecoration(
-            errorStyle: const TextStyle(color: Colors.indigoAccent),
             contentPadding: const EdgeInsets.all(5),
             hintStyle: const TextStyle(
               color: Colors.grey,

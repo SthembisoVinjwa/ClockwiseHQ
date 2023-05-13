@@ -1,9 +1,11 @@
 import 'package:clockwisehq/file_handling.dart';
+import 'package:clockwisehq/provider/provider.dart';
 import 'package:clockwisehq/timetable/add.dart';
 import 'package:clockwisehq/timetable/arrow_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'activity.dart';
 
 class Timetable extends StatefulWidget {
@@ -59,25 +61,10 @@ class _TimetableState extends State<Timetable> {
     });
   }
 
-  Future<void> _readActivities() async {
-    setState(() {
-      _isLoadingActivities = true;
-    });
-    myActivities = await TimetableFile().readActivitiesFromJsonFile();
-    setState(() {
-      _isLoadingActivities = false;
-    });
-  }
-
-  Future<void> _saveActivities() async {
-    await TimetableFile().saveActivities(myActivities);
-  }
-
   @override
   void initState() {
     super.initState();
     _initBannerAd();
-    _readActivities();
   }
 
   void _initBannerAd() {
@@ -98,11 +85,13 @@ class _TimetableState extends State<Timetable> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ActivityProvider>(context);
+    myActivities = provider.activityList;
+
     if (set == false) {
-      _dropdownValue = 'Daily';
+      _dropdownValue = 'Weekly';
       set = true;
     }
-
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
@@ -110,11 +99,12 @@ class _TimetableState extends State<Timetable> {
         height: 40,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.indigoAccent,
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Colors.black),
+              borderRadius: BorderRadius.circular(15),
             ), // Text color
           ),
           onPressed: () {
@@ -140,7 +130,27 @@ class _TimetableState extends State<Timetable> {
               ),
             ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              DropdownButton(
+                underline: const SizedBox(),
+                alignment: Alignment.center,
+                hint: const Text('Timeframe'),
+                items: items,
+                iconEnabledColor: Colors.black,
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500),
+                value: _dropdownValue,
+                onChanged: (String? value) {
+                  if (value is String) {
+                    setState(() {
+                      _dropdownValue = value;
+                    });
+                  }
+                },
+              ),
               _dropdownValue != 'Weekly'
                   ? SizedBox(
                       height: 60,
@@ -161,26 +171,7 @@ class _TimetableState extends State<Timetable> {
                     )
                   : const SizedBox(
                       height: 60,
-                      width: 200,
                     ),
-              DropdownButton(
-                alignment: Alignment.center,
-                hint: const Text('Timeframe'),
-                items: items,
-                iconEnabledColor: Colors.indigoAccent,
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500),
-                value: _dropdownValue,
-                onChanged: (String? value) {
-                  if (value is String) {
-                    setState(() {
-                      _dropdownValue = value;
-                    });
-                  }
-                },
-              ),
             ],
           ),
           if (_isLoadingActivities)
@@ -191,20 +182,27 @@ class _TimetableState extends State<Timetable> {
                 ),
                 const Center(
                     child: CircularProgressIndicator(
-                  color: Colors.indigoAccent,
+                  color: Colors.black,
                 )),
               ],
             )
           else if (myActivities.isNotEmpty)
-            SizedBox(
-              height: 605,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
+            Card(
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: Colors.grey),
+              ),
+              elevation: 6,
+              child: SizedBox(
+                height: 605,
+                width: MediaQuery.of(context).size.width-50,
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: _dropdownValue == 'Weekly'
-                      ? buildWeeklyTable()
-                      : buildDailyTimetable(),
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: _dropdownValue == 'Weekly'
+                        ? buildWeeklyTable()
+                        : buildDailyTimetable(),
+                  ),
                 ),
               ),
             )
@@ -227,15 +225,17 @@ class _TimetableState extends State<Timetable> {
     int weekDay = now.weekday;
     DateTime monday = now.subtract(Duration(days: weekDay - 1));
     DateTime sunday = now.add(Duration(days: 7 - weekDay));
-    List<Activity> activeActivities = myActivities.where((activity) =>
-        activity.type == 'class' &&
-            now.isAfter(activity.startDate) &&
-            now.isBefore(activity.endDate) ||
-        now.isAtSameMomentAs(activity.startDate) ||
-        now.isAtSameMomentAs(activity.endDate)).toList();
+    List<Activity> activeActivities = myActivities
+        .where((activity) =>
+            activity.type == 'Class' &&
+                now.isAfter(activity.startDate) &&
+                now.isBefore(activity.endDate) ||
+            now.isAtSameMomentAs(activity.startDate) ||
+            now.isAtSameMomentAs(activity.endDate))
+        .toList();
 
     final events = myActivities.where((activity) =>
-        activity.type == 'event' &&
+        activity.type == 'Event' &&
         (activity.startDate.isAtSameMomentAs(monday) ||
             activity.startDate.isAtSameMomentAs(monday) ||
             (activity.startDate.isAfter(monday) &&
@@ -286,15 +286,17 @@ class _TimetableState extends State<Timetable> {
     int weekDay = now.weekday;
     DateTime monday = now.subtract(Duration(days: weekDay - 1));
     DateTime sunday = now.add(Duration(days: 7 - weekDay));
-    List<Activity> activeActivities = myActivities.where((activity) =>
-    activity.type == 'class' &&
-        now.isAfter(activity.startDate) &&
-        now.isBefore(activity.endDate) ||
-        now.isAtSameMomentAs(activity.startDate) ||
-        now.isAtSameMomentAs(activity.endDate)).toList();
+    List<Activity> activeActivities = myActivities
+        .where((activity) =>
+            activity.type == 'Class' &&
+                now.isAfter(activity.startDate) &&
+                now.isBefore(activity.endDate) ||
+            now.isAtSameMomentAs(activity.startDate) ||
+            now.isAtSameMomentAs(activity.endDate))
+        .toList();
 
     final events = myActivities.where((activity) =>
-    activity.type == 'event' &&
+        activity.type == 'Event' &&
         (activity.startDate.isAtSameMomentAs(monday) ||
             activity.startDate.isAtSameMomentAs(monday) ||
             (activity.startDate.isAfter(monday) &&
@@ -319,7 +321,7 @@ class _TimetableState extends State<Timetable> {
             DataCell(Text(time.format(context))),
             for (final day in currentDay)
               DataCell(Container(
-                width: 160,
+                width: MediaQuery.of(context).size.width-189,
                 alignment: Alignment.center,
                 child: Text(
                   maxLines: 3,
