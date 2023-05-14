@@ -4,8 +4,9 @@ class ArrowTextWidget extends StatefulWidget {
   final List<String> texts;
   final Function(String) onUpdateText;
   int index;
+  Color textColor;
 
-  ArrowTextWidget({super.key, required this.texts, required this.onUpdateText, required this.index});
+  ArrowTextWidget({super.key, required this.texts, required this.onUpdateText, required this.index, required this.textColor});
 
   @override
   _ArrowTextWidgetState createState() => _ArrowTextWidgetState();
@@ -35,19 +36,19 @@ class _ArrowTextWidgetState extends State<ArrowTextWidget> {
       children: [
         IconButton(
           onPressed: _decrementIndex,
-          icon: const Icon(Icons.arrow_left),
-          color: Colors.black,
+          icon: Icon(Icons.arrow_left, color: widget.textColor),
+          color: widget.textColor,
         ),
         const SizedBox(width: 16.0),
         Text(
           widget.texts[_index],
-          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500, color: widget.textColor),
         ),
         const SizedBox(width: 16.0),
         IconButton(
           onPressed: _incrementIndex,
-          icon: const Icon(Icons.arrow_right),
-          color: Colors.black,
+          icon: Icon(Icons.arrow_right, color: widget.textColor,),
+          color: widget.textColor,
         ),
       ],
     );

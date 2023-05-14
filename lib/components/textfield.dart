@@ -4,10 +4,11 @@ class MyTextField extends StatelessWidget {
   final controller;
   final bool obscureText;
   final String hintText;
+  final Color textColor;
   final String? Function(String?)? validateField;
 
   const MyTextField(
-      {Key? key, required this.controller, required this.obscureText, required this.hintText, required this.validateField})
+      {Key? key, required this.controller, required this.obscureText, required this.hintText, required this.validateField, required this.textColor})
       : super(key: key);
 
   @override
@@ -19,7 +20,7 @@ class MyTextField extends StatelessWidget {
         child: TextFormField(
           validator: validateField,
           cursorColor: Colors.grey,
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: textColor),
           controller: controller,
           obscureText: obscureText,
           decoration: InputDecoration(

@@ -5,6 +5,8 @@ import '../provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
 class SettingsDialog extends StatefulWidget {
+  const SettingsDialog({super.key});
+
   @override
   _SettingsDialogState createState() => _SettingsDialogState();
 }
@@ -23,7 +25,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       children: [
         ListTile(
-          title: Text('Dark mode'),
+          title: const Text('Dark mode'),
           trailing: Switch(
             activeTrackColor: Colors.grey,
             activeColor: Colors.black87,

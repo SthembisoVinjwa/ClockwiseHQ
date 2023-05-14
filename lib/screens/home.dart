@@ -65,8 +65,7 @@ class _HomeState extends State<Home> {
       _isLoadingActivities = true;
     });
     List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
-    Provider.of<MainProvider>(context, listen: false)
-        .updateActivityList(acts);
+    Provider.of<MainProvider>(context, listen: false).updateActivityList(acts);
     setState(() {
       _isLoadingActivities = false;
     });
@@ -137,6 +136,7 @@ class _HomeState extends State<Home> {
               ),
               subtitle: Text(
                 '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(color: global.aColor),
               ),
             ),
           ));
@@ -370,7 +370,10 @@ class _HomeState extends State<Home> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.access_time_filled_outlined, color: global.aColor,),
+                Icon(
+                  Icons.access_time_filled_outlined,
+                  color: global.aColor,
+                ),
                 Text(
                   "ClockwiseHQ",
                   style: TextStyle(
@@ -514,6 +517,7 @@ class _HomeState extends State<Home> {
                                   child: Text(
                                     'Classes and Events: ${formatDate(_focusedDay)}',
                                     style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 16.0,
                                       color: global.aColor,
                                     ),

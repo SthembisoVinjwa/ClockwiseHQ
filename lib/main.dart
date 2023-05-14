@@ -19,8 +19,14 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<MainProvider>(
       create: (context) => MainProvider(),
       child: MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light,
+          primarySwatch: Colors.grey,
+          hoverColor: Colors.black87,
+          indicatorColor: Colors.black87,
+        ),
         debugShowCheckedModeBanner: false,
-        home: const Home(),
+        home: Home(),
       ),
     );
   }

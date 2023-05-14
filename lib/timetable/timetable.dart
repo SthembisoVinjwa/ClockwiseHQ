@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'activity.dart';
+import 'package:clockwisehq/global/global.dart' as global;
 
 class Timetable extends StatefulWidget {
   const Timetable({Key? key}) : super(key: key);
@@ -88,6 +89,14 @@ class _TimetableState extends State<Timetable> {
     final provider = Provider.of<MainProvider>(context);
     myActivities = provider.activityList;
 
+    if (provider.isDarkMode == true) {
+      global.aColor = Colors.white;
+      global.bColor = Colors.black87;
+    } else {
+      global.bColor = Colors.white;
+      global.aColor = Colors.black87;
+    }
+
     if (set == false) {
       _dropdownValue = 'Weekly';
       set = true;
@@ -99,11 +108,11 @@ class _TimetableState extends State<Timetable> {
         height: 40,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.black,
-            backgroundColor: Colors.white,
+            foregroundColor: global.aColor,
+            backgroundColor: global.bColor,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             shape: RoundedRectangleBorder(
-              side: const BorderSide(color: Colors.black),
+              side: BorderSide(color: global.aColor),
               borderRadius: BorderRadius.circular(15),
             ), // Text color
           ),
@@ -129,92 +138,105 @@ class _TimetableState extends State<Timetable> {
                 ),
               ),
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              DropdownButton(
-                underline: const SizedBox(),
-                alignment: Alignment.center,
-                hint: const Text('Timeframe'),
-                items: items,
-                iconEnabledColor: Colors.black,
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500),
-                value: _dropdownValue,
-                onChanged: (String? value) {
-                  if (value is String) {
-                    setState(() {
-                      _dropdownValue = value;
-                    });
-                  }
-                },
-              ),
-              _dropdownValue != 'Weekly'
-                  ? SizedBox(
-                      height: 60,
-                      width: 200,
-                      child: ArrowTextWidget(
-                        texts: const [
-                          'Mon',
-                          'Tue',
-                          'Wed',
-                          'Thu',
-                          'Fri',
-                          'Sat',
-                          'Sun'
-                        ],
-                        onUpdateText: _updateText,
-                        index: DateTime.now().weekday - 1,
-                      ),
-                    )
-                  : const SizedBox(
-                      height: 60,
-                    ),
-            ],
-          ),
-          if (_isLoadingActivities)
-            Column(
+          Container(
+            color: global.bColor,
+            child: Column(
               children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DropdownButton(
+                      underline: const SizedBox(),
+                      alignment: Alignment.center,
+                      hint: Text(
+                        'Timeframe',
+                        style: TextStyle(color: global.aColor),
+                      ),
+                      items: items,
+                      iconEnabledColor: global.aColor,
+                      dropdownColor: global.bColor,
+                      style: TextStyle(
+                          color: global.aColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                      value: _dropdownValue,
+                      onChanged: (String? value) {
+                        if (value is String) {
+                          setState(() {
+                            _dropdownValue = value;
+                          });
+                        }
+                      },
+                    ),
+                    _dropdownValue != 'Weekly'
+                        ? SizedBox(
+                            height: 60,
+                            width: 200,
+                            child: ArrowTextWidget(
+                              texts: const [
+                                'Mon',
+                                'Tue',
+                                'Wed',
+                                'Thu',
+                                'Fri',
+                                'Sat',
+                                'Sun'
+                              ],
+                              onUpdateText: _updateText,
+                              index: DateTime.now().weekday - 1,
+                              textColor: global.aColor,
+                            ),
+                          )
+                        : const SizedBox(
+                            height: 60,
+                          ),
+                  ],
                 ),
-                const Center(
-                    child: CircularProgressIndicator(
-                  color: Colors.black,
-                )),
+                if (_isLoadingActivities)
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.3,
+                      ),
+                      Center(
+                          child: CircularProgressIndicator(
+                        color: global.aColor,
+                      )),
+                    ],
+                  )
+                else if (myActivities.isNotEmpty)
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey),
+                    ),
+                    elevation: 6,
+                    child: Container(
+                      color: global.bColor,
+                      height: 605,
+                      width: MediaQuery.of(context).size.width - 50,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: _dropdownValue == 'Weekly'
+                              ? buildWeeklyTable()
+                              : buildDailyTimetable(),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 605,
+                    child: Center(
+                        child: Text(
+                      'No timetable data found',
+                      style: TextStyle(fontSize: 18, color: global.aColor),
+                    )),
+                  )
               ],
-            )
-          else if (myActivities.isNotEmpty)
-            Card(
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: Colors.grey),
-              ),
-              elevation: 6,
-              child: SizedBox(
-                height: 605,
-                width: MediaQuery.of(context).size.width-50,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: _dropdownValue == 'Weekly'
-                        ? buildWeeklyTable()
-                        : buildDailyTimetable(),
-                  ),
-                ),
-              ),
-            )
-          else
-            const SizedBox(
-              height: 605,
-              child: Center(
-                  child: Text(
-                'No timetable data found',
-                style: TextStyle(fontSize: 18),
-              )),
-            )
+            ),
+          ),
         ],
       ),
     );
@@ -253,20 +275,21 @@ class _TimetableState extends State<Timetable> {
         ...daysOfWeek.map((day) => DataColumn(
                 label: Text(
               day,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: global.aColor),
             ))),
       ],
       rows: [
         for (final time in timesOfDay)
           DataRow(cells: [
-            DataCell(Text(time.format(context))),
+            DataCell(Text(time.format(context), style: TextStyle(color: global.aColor),)),
             for (final day in daysOfWeek)
               DataCell(Container(
                 alignment: Alignment.center,
                 width: 55,
                 child: Text(
                   maxLines: 3,
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: global.aColor),
                   overflow: TextOverflow.ellipsis,
                   activeActivities
                       .where((activity) =>
@@ -318,14 +341,14 @@ class _TimetableState extends State<Timetable> {
       rows: [
         for (final time in timesOfDay)
           DataRow(cells: [
-            DataCell(Text(time.format(context))),
+            DataCell(Text(time.format(context), style: TextStyle(color: global.aColor),)),
             for (final day in currentDay)
               DataCell(Container(
-                width: MediaQuery.of(context).size.width-189,
+                width: MediaQuery.of(context).size.width - 189,
                 alignment: Alignment.center,
                 child: Text(
                   maxLines: 3,
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14, color: global.aColor),
                   overflow: TextOverflow.ellipsis,
                   activeActivities
                       .where((activity) =>

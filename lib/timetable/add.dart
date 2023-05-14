@@ -7,9 +7,10 @@ import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:provider/provider.dart';
-
 import '../provider/provider.dart';
+import '../screens/settingDialog.dart';
 import 'activity.dart';
+import 'package:clockwisehq/global/global.dart' as global;
 
 class AddTask extends StatefulWidget {
   const AddTask({Key? key}) : super(key: key);
@@ -78,6 +79,16 @@ class _AddTaskState extends State<AddTask> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<MainProvider>(context);
+
+    if (provider.isDarkMode == true) {
+      global.aColor = Colors.white;
+      global.bColor = Colors.black87;
+    } else {
+      global.bColor = Colors.white;
+      global.aColor = Colors.black87;
+    }
+
     if (set == false) {
       _dropdownValue = 'Class';
       set = true;
@@ -87,36 +98,60 @@ class _AddTaskState extends State<AddTask> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
-          elevation: 1.0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          title: const Text(
-            "Add Class/Event",
-            style: TextStyle(
-              fontSize: 18.0,
+            backgroundColor: global.bColor,
+            elevation: 1.0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: global.aColor,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-          ),
-        ),
+            title: Text(
+              "Add Class/Event",
+              style: TextStyle(
+                fontSize: 18.0,
+                color: global.aColor,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 25.0,
+                  color: global.aColor,
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const SettingsDialog();
+                    },
+                  );
+                },
+              )
+            ]),
       ),
       body: Container(
           padding: const EdgeInsets.all(5.0),
+          color: global.bColor,
           child: Form(
             key: _formKey,
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 10),
                 Row(
-                  children: const [
+                  children: [
                     Padding(
                       padding: EdgeInsets.only(left: 15),
                       child: Text(
                         'Title',
                         style: TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
                       ),
                     ),
                   ],
@@ -125,6 +160,7 @@ class _AddTaskState extends State<AddTask> {
                 SizedBox(
                   height: 70,
                   child: MyTextField(
+                    textColor: global.aColor,
                     controller: titleController,
                     obscureText: false,
                     hintText: 'Class/event title',
@@ -139,13 +175,15 @@ class _AddTaskState extends State<AddTask> {
                 ),
                 const SizedBox(height: 4),
                 Row(
-                  children: const [
+                  children: [
                     Padding(
                       padding: EdgeInsets.only(left: 15),
                       child: Text(
                         'Type',
                         style: TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
                       ),
                     ),
                   ],
@@ -155,6 +193,7 @@ class _AddTaskState extends State<AddTask> {
                   padding: const EdgeInsets.only(right: 15, left: 15),
                   height: 45,
                   child: DropdownButtonFormField(
+                    dropdownColor: global.bColor,
                     decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(5),
                         enabledBorder: OutlineInputBorder(
@@ -177,11 +216,10 @@ class _AddTaskState extends State<AddTask> {
                               BorderSide(color: Colors.grey, width: 1.5),
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         ),
-                        filled: true,
-                        fillColor: Colors.white),
+                        ),
                     items: items,
-                    iconEnabledColor: Colors.black,
-                    style: const TextStyle(color: Colors.black, fontSize: 16.0),
+                    iconEnabledColor: global.aColor,
+                    style: TextStyle(color: global.aColor, fontSize: 16.0),
                     value: _dropdownValue,
                     onChanged: (String? value) {
                       if (value is String) {
@@ -194,13 +232,15 @@ class _AddTaskState extends State<AddTask> {
                 ),
                 const SizedBox(height: 22),
                 Row(
-                  children: const [
+                  children: [
                     Padding(
                       padding: EdgeInsets.only(left: 15),
                       child: Text(
                         'Venue',
                         style: TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
                       ),
                     ),
                   ],
@@ -209,6 +249,7 @@ class _AddTaskState extends State<AddTask> {
                 SizedBox(
                   height: 70,
                   child: MyTextField(
+                    textColor: global.aColor,
                     controller: locationController,
                     obscureText: false,
                     hintText: 'Venue/location name',
@@ -217,13 +258,15 @@ class _AddTaskState extends State<AddTask> {
                 ),
                 const SizedBox(height: 4),
                 Row(
-                  children: const [
+                  children: [
                     Padding(
-                      padding: EdgeInsets.only(left: 15),
+                      padding: const EdgeInsets.only(left: 15),
                       child: Text(
                         'Instructor',
                         style: TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
                       ),
                     ),
                   ],
@@ -232,6 +275,7 @@ class _AddTaskState extends State<AddTask> {
                 SizedBox(
                   height: 70,
                   child: MyTextField(
+                    textColor: global.aColor,
                     controller: instructorController,
                     obscureText: false,
                     hintText: 'Instructor/teacher name',
@@ -245,17 +289,21 @@ class _AddTaskState extends State<AddTask> {
                       padding: const EdgeInsets.only(left: 15),
                       child: Text(
                         _dropdownValue == 'Class' ? 'Start Date' : 'Date',
-                        style: const TextStyle(
-                            fontSize: 17.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
                       ),
                     ),
                     if (_dropdownValue == 'Class')
-                      const Padding(
-                        padding: EdgeInsets.only(left: 107),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 107),
                         child: Text(
                           'End Date',
                           style: TextStyle(
-                              fontSize: 17.0, fontWeight: FontWeight.bold),
+                              fontSize: 17.0,
+                              fontWeight: FontWeight.bold,
+                              color: global.aColor),
                         ),
                       ),
                   ],
@@ -271,10 +319,38 @@ class _AddTaskState extends State<AddTask> {
                         child: TextFormField(
                           onTap: () async {
                             DateTime? selectedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.utc(2010, 10, 16),
-                                lastDate: DateTime.utc(2090, 10, 16));
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.utc(2010, 10, 16),
+                              lastDate: DateTime.utc(2090, 10, 16),
+                              builder: (BuildContext context, Widget? child) {
+                                if (provider.isDarkMode) {
+                                  return Theme(
+                                    data: ThemeData.dark().copyWith(
+                                      primaryColor: global.aColor,
+                                      accentColor: global.aColor,
+                                      colorScheme: ColorScheme.dark(
+                                          primary: global.aColor),
+                                      buttonTheme: const ButtonThemeData(
+                                          textTheme: ButtonTextTheme.primary),
+                                    ),
+                                    child: child!,
+                                  );
+                                } else {
+                                  return Theme(
+                                    data: ThemeData.light().copyWith(
+                                      primaryColor: global.aColor,
+                                      accentColor: global.aColor,
+                                      colorScheme: ColorScheme.light(
+                                          primary: global.aColor),
+                                      buttonTheme: const ButtonThemeData(
+                                          textTheme: ButtonTextTheme.primary),
+                                    ),
+                                    child: child!,
+                                  );
+                                }
+                              },
+                            );
                             if (selectedDate != null) {
                               setState(() {
                                 startDateController.text =
@@ -283,35 +359,36 @@ class _AddTaskState extends State<AddTask> {
                               });
                             }
                           },
-                          cursorColor: Colors.black,
-                          style: const TextStyle(color: Colors.black),
+                          cursorColor: global.aColor,
+                          style: TextStyle(color: global.aColor),
                           controller: startDateController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(5),
-                            icon: Icon(Icons.calendar_today_sharp),
-                            hintStyle: TextStyle(
+                            icon: Icon(Icons.calendar_today_sharp,
+                                color: global.aColor),
+                            hintStyle: const TextStyle(
                               color: Colors.grey,
                             ),
                             hintText: 'yyyy-mm-dd',
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.grey, width: 1.5),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10.0)),
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.grey, width: 1.5),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10.0)),
                             ),
-                            errorBorder: OutlineInputBorder(
+                            errorBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.grey, width: 1.5),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10.0)),
                             ),
-                            focusedErrorBorder: OutlineInputBorder(
+                            focusedErrorBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.grey, width: 1.5),
                               borderRadius:
@@ -341,10 +418,38 @@ class _AddTaskState extends State<AddTask> {
                           child: TextFormField(
                             onTap: () async {
                               DateTime? selectedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.utc(2010, 10, 16),
-                                  lastDate: DateTime.utc(2090, 10, 16));
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.utc(2010, 10, 16),
+                                lastDate: DateTime.utc(2090, 10, 16),
+                                builder: (BuildContext context, Widget? child) {
+                                  if (provider.isDarkMode) {
+                                    return Theme(
+                                      data: ThemeData.dark().copyWith(
+                                        primaryColor: global.aColor,
+                                        accentColor: global.aColor,
+                                        colorScheme: ColorScheme.dark(
+                                            primary: global.aColor),
+                                        buttonTheme: const ButtonThemeData(
+                                            textTheme: ButtonTextTheme.primary),
+                                      ),
+                                      child: child!,
+                                    );
+                                  } else {
+                                    return Theme(
+                                      data: ThemeData.light().copyWith(
+                                        primaryColor: global.aColor,
+                                        accentColor: global.aColor,
+                                        colorScheme: ColorScheme.light(
+                                            primary: global.aColor),
+                                        buttonTheme: const ButtonThemeData(
+                                            textTheme: ButtonTextTheme.primary),
+                                      ),
+                                      child: child!,
+                                    );
+                                  }
+                                },
+                              );
                               if (selectedDate != null) {
                                 setState(() {
                                   endDateController.text =
@@ -353,35 +458,36 @@ class _AddTaskState extends State<AddTask> {
                                 });
                               }
                             },
-                            cursorColor: Colors.black,
-                            style: const TextStyle(color: Colors.black),
+                            cursorColor: global.aColor,
+                            style: TextStyle(color: global.aColor),
                             controller: endDateController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(5),
-                              icon: Icon(Icons.calendar_today_sharp),
-                              hintStyle: TextStyle(
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.all(5),
+                              icon: Icon(Icons.calendar_today_sharp,
+                                  color: global.aColor),
+                              hintStyle: const TextStyle(
                                 color: Colors.grey,
                               ),
                               hintText: 'yyyy-MM-dd',
-                              enabledBorder: OutlineInputBorder(
+                              enabledBorder: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.grey, width: 1.5),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10.0)),
                               ),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.grey, width: 1.5),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10.0)),
                               ),
-                              errorBorder: OutlineInputBorder(
+                              errorBorder: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.grey, width: 1.5),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10.0)),
                               ),
-                              focusedErrorBorder: OutlineInputBorder(
+                              focusedErrorBorder: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.grey, width: 1.5),
                                 borderRadius:
@@ -409,6 +515,7 @@ class _AddTaskState extends State<AddTask> {
                   Padding(
                     padding: const EdgeInsets.only(left: 15, right: 13),
                     child: MultiSelectBottomSheetField(
+                      buttonIcon: Icon(Icons.arrow_drop_down, color: global.aColor,),
                       validator: (List<dynamic>? value) {
                         if (value!.isEmpty) {
                           setState(() {
@@ -422,7 +529,7 @@ class _AddTaskState extends State<AddTask> {
                           return null;
                         }
                       },
-                      selectedColor: Colors.indigoAccent.withOpacity(0.4),
+                      selectedColor: Colors.black87.withOpacity(0.70),
                       decoration: BoxDecoration(
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10.0)),
@@ -434,12 +541,14 @@ class _AddTaskState extends State<AddTask> {
                       initialChildSize: 0.4,
                       listType: MultiSelectListType.CHIP,
                       searchable: true,
-                      buttonText: const Text("Day(s) of the week",
-                          style: TextStyle(fontSize: 16, color: Colors.black)),
+                      buttonText: Text("Day(s) of the week",
+                          style: TextStyle(fontSize: 16, color: global.aColor)),
                       title: const Text(
                         "Days",
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87),
                       ),
                       items: daysOfWeek,
                       onConfirm: (values) {
@@ -453,6 +562,7 @@ class _AddTaskState extends State<AddTask> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15),
                   child: MultiSelectBottomSheetField(
+                    buttonIcon: Icon(Icons.arrow_drop_down, color: global.aColor,),
                     validator: (List<dynamic>? value) {
                       if (value!.isEmpty) {
                         setState(() {
@@ -466,7 +576,7 @@ class _AddTaskState extends State<AddTask> {
                         return null;
                       }
                     },
-                    selectedColor: Colors.indigoAccent.withOpacity(0.4),
+                    selectedColor: Colors.black87.withOpacity(0.70),
                     decoration: BoxDecoration(
                       borderRadius:
                           const BorderRadius.all(Radius.circular(10.0)),
@@ -478,8 +588,8 @@ class _AddTaskState extends State<AddTask> {
                     initialChildSize: 0.4,
                     listType: MultiSelectListType.CHIP,
                     searchable: true,
-                    buttonText: const Text("Time(s)",
-                        style: TextStyle(fontSize: 16, color: Colors.black)),
+                    buttonText: Text("Time(s)",
+                        style: TextStyle(fontSize: 16, color: global.aColor)),
                     title: const Text(
                       "Times",
                       style:
@@ -505,12 +615,12 @@ class _AddTaskState extends State<AddTask> {
                   width: 100,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      backgroundColor: Colors.white,
+                      foregroundColor: global.aColor,
+                      backgroundColor: global.bColor,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
-                        side: const BorderSide(color: Colors.black),
+                        side: BorderSide(color: global.aColor),
                         borderRadius: BorderRadius.circular(15),
                       ), // Text color
                     ),
@@ -532,14 +642,10 @@ class _AddTaskState extends State<AddTask> {
                             DateTime.parse(startDateController.text),
                             DateTime.parse(endDateController.text),
                           );
-                          List<Activity> activities =
-                              Provider.of<MainProvider>(context,
-                                      listen: false)
-                                  .activityList;
+                          List<Activity> activities = provider.activityList;
                           activities.add(activity);
                           await TimetableFile().saveActivities(activities);
-                          Provider.of<MainProvider>(context, listen: false)
-                              .updateActivityList(activities);
+                          provider.updateActivityList(activities);
                         } else {
                           activity = Activity(
                             titleController.text,
@@ -559,13 +665,14 @@ class _AddTaskState extends State<AddTask> {
                               .readActivitiesFromJsonFile();
                           activities.add(activity);
                           await TimetableFile().saveActivities(activities);
+                          provider.updateActivityList(activities);
                         }
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text(
+                    child: Text(
                       'Save',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, color: global.aColor),
                     ),
                   ),
                 ),
