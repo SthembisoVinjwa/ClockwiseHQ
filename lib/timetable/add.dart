@@ -1,5 +1,6 @@
+import 'package:clockwisehq/components/AddedItemList.dart';
 import 'package:clockwisehq/components/textfield.dart';
-import 'package:clockwisehq/file_handling.dart';
+import 'package:clockwisehq/file2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
@@ -7,9 +8,10 @@ import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:provider/provider.dart';
+import '../components/dayTimePicker.dart';
 import '../provider/provider.dart';
 import '../screens/settingDialog.dart';
-import 'activity.dart';
+import 'activity2.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
 class AddTask extends StatefulWidget {
@@ -26,10 +28,14 @@ class _AddTaskState extends State<AddTask> {
   final instructorController = TextEditingController();
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-  String? _dropdownValue;
+  Activity2 activity = Activity2('', '', '', {}, '', DateTime.utc(2000, 10, 16),
+      DateTime.utc(2090, 10, 16));
+  String _dropdownValue = 'Class';
+  String _dayValue = 'Mon';
   bool timeError = false;
   bool dayError = false;
-  bool set = false;
+  List<String> addedDays = [];
+  double kVertSpacing = 15;
   List<DropdownMenuItem<String>> items = const [
     DropdownMenuItem(
       value: 'Class',
@@ -41,14 +47,35 @@ class _AddTaskState extends State<AddTask> {
     ),
   ];
 
-  List<MultiSelectItem<String>> daysOfWeek = [
-    MultiSelectItem('Mon', 'Mon'),
-    MultiSelectItem('Tue', 'Tue'),
-    MultiSelectItem('Wed', 'Wed'),
-    MultiSelectItem('Thu', 'Thu'),
-    MultiSelectItem('Fri', 'Fri'),
-    MultiSelectItem('Sat', 'Sat'),
-    MultiSelectItem('Sun', 'Sun'),
+  List<DropdownMenuItem<String>> days = const [
+    DropdownMenuItem(
+      value: 'Mon',
+      child: Text('Mon'),
+    ),
+    DropdownMenuItem(
+      value: 'Tue',
+      child: Text('Tue'),
+    ),
+    DropdownMenuItem(
+      value: 'Wed',
+      child: Text('Wed'),
+    ),
+    DropdownMenuItem(
+      value: 'Thu',
+      child: Text('Thu'),
+    ),
+    DropdownMenuItem(
+      value: 'Fri',
+      child: Text('Fri'),
+    ),
+    DropdownMenuItem(
+      value: 'Sat',
+      child: Text('Sat'),
+    ),
+    DropdownMenuItem(
+      value: 'Sun',
+      child: Text('Sun'),
+    ),
   ];
 
   static const timesOfDay = [
@@ -70,11 +97,11 @@ class _AddTaskState extends State<AddTask> {
     TimeOfDay(hour: 22, minute: 0),
   ];
 
+  static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
   List<MultiSelectItem<String>> times = timesOfDay
       .map((e) => MultiSelectItem('${e.hour}:00', '${e.hour}:00'))
       .toList();
-
-  List<String> selectedDays = [];
   List<String> selectedTimes = [];
 
   @override
@@ -83,16 +110,12 @@ class _AddTaskState extends State<AddTask> {
 
     if (provider.isDarkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black87;
+      global.bColor = Colors.black;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black87;
+      global.aColor = Colors.black;
     }
 
-    if (set == false) {
-      _dropdownValue = 'Class';
-      set = true;
-    }
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
@@ -141,7 +164,7 @@ class _AddTaskState extends State<AddTask> {
             key: _formKey,
             child: Column(
               children: <Widget>[
-                const SizedBox(height: 10),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     Padding(
@@ -156,8 +179,8 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
+                SizedBox(height: kVertSpacing),
+                Container(
                   height: 70,
                   child: MyTextField(
                     textColor: global.aColor,
@@ -173,7 +196,7 @@ class _AddTaskState extends State<AddTask> {
                     },
                   ),
                 ),
-                const SizedBox(height: 4),
+                //SizedBox(height: kVertSpacing),
                 Row(
                   children: [
                     Padding(
@@ -188,35 +211,31 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: kVertSpacing),
                 Container(
                   padding: const EdgeInsets.only(right: 15, left: 15),
                   height: 45,
                   child: DropdownButtonFormField(
                     dropdownColor: global.bColor,
                     decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(5),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.grey, width: 1.5),
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.grey, width: 1.5),
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.grey, width: 1.5),
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.grey, width: 1.5),
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                        ),
+                      contentPadding: EdgeInsets.all(5),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1.5),
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1.5),
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1.5),
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 1.5),
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
                     items: items,
                     iconEnabledColor: global.aColor,
                     style: TextStyle(color: global.aColor, fontSize: 16.0),
@@ -230,7 +249,7 @@ class _AddTaskState extends State<AddTask> {
                     },
                   ),
                 ),
-                const SizedBox(height: 22),
+                SizedBox(height: kVertSpacing),
                 Row(
                   children: [
                     Padding(
@@ -245,18 +264,15 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 70,
-                  child: MyTextField(
-                    textColor: global.aColor,
-                    controller: locationController,
-                    obscureText: false,
-                    hintText: 'Venue/location name',
-                    validateField: (String? venue) {},
-                  ),
+                SizedBox(height: kVertSpacing),
+                MyTextField(
+                  textColor: global.aColor,
+                  controller: locationController,
+                  obscureText: false,
+                  hintText: 'Venue/location name',
+                  validateField: (String? venue) {},
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: kVertSpacing),
                 Row(
                   children: [
                     Padding(
@@ -271,18 +287,15 @@ class _AddTaskState extends State<AddTask> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 70,
-                  child: MyTextField(
-                    textColor: global.aColor,
-                    controller: instructorController,
-                    obscureText: false,
-                    hintText: 'Instructor/teacher name',
-                    validateField: (String? password) {},
-                  ),
+                SizedBox(height: kVertSpacing),
+                MyTextField(
+                  textColor: global.aColor,
+                  controller: instructorController,
+                  obscureText: false,
+                  hintText: 'Instructor/teacher name',
+                  validateField: (String? password) {},
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: kVertSpacing),
                 Row(
                   children: [
                     Padding(
@@ -308,7 +321,7 @@ class _AddTaskState extends State<AddTask> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: kVertSpacing),
                 Row(
                   children: [
                     Padding(
@@ -354,7 +367,7 @@ class _AddTaskState extends State<AddTask> {
                             if (selectedDate != null) {
                               setState(() {
                                 startDateController.text =
-                                    DateFormat('yyyy-mm-dd')
+                                    DateFormat('yyyy-MM-dd')
                                         .format(selectedDate);
                               });
                             }
@@ -468,7 +481,7 @@ class _AddTaskState extends State<AddTask> {
                               hintStyle: const TextStyle(
                                 color: Colors.grey,
                               ),
-                              hintText: 'yyyy-MM-dd',
+                              hintText: 'yyyy-mm-dd',
                               enabledBorder: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.grey, width: 1.5),
@@ -510,106 +523,192 @@ class _AddTaskState extends State<AddTask> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                if (_dropdownValue == 'Class')
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 13),
-                    child: MultiSelectBottomSheetField(
-                      buttonIcon: Icon(Icons.arrow_drop_down, color: global.aColor,),
-                      validator: (List<dynamic>? value) {
-                        if (value!.isEmpty) {
-                          setState(() {
-                            dayError = true;
-                          });
-                          return 'Select atleast one day';
-                        } else {
-                          setState(() {
-                            dayError = false;
-                          });
-                          return null;
-                        }
-                      },
-                      selectedColor: Colors.black87.withOpacity(0.70),
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10.0)),
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1.5,
+                SizedBox(height: kVertSpacing),
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text(
+                        'Day and Time(s)',
+                        style: TextStyle(
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: global.aColor),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: kVertSpacing),
+                Row(
+                  children: [
+                    if (_dropdownValue != 'Event')
+                      Container(
+                        padding: const EdgeInsets.only(right: 15, left: 15),
+                        height: 45,
+                        width: 167,
+                        child: DropdownButtonFormField(
+                          dropdownColor: global.bColor,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(5),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                          ),
+                          items: days,
+                          iconEnabledColor: global.aColor,
+                          style:
+                              TextStyle(color: global.aColor, fontSize: 16.0),
+                          value: _dayValue,
+                          onChanged: (String? value) {
+                            if (value is String) {
+                              setState(() {
+                                _dayValue = value;
+                              });
+                            }
+                          },
                         ),
                       ),
-                      initialChildSize: 0.4,
-                      listType: MultiSelectListType.CHIP,
-                      searchable: true,
-                      buttonText: Text("Day(s) of the week",
-                          style: TextStyle(fontSize: 16, color: global.aColor)),
-                      title: const Text(
-                        "Days",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: _dropdownValue == 'Class' ? 3 : 15, right: 17),
+                      child: MultiSelectBottomSheetField(
+                        buttonIcon: Icon(
+                          Icons.arrow_drop_down,
+                          color: global.aColor,
+                        ),
+                        /*validator: (List<dynamic>? value) {
+                          if (value!.isEmpty) {
+                            setState(() {
+                              timeError = true;
+                            });
+                            return 'Select atleast one time';
+                          } else {
+                            setState(() {
+                              timeError = false;
+                            });
+                            return null;
+                          }
+                        },*/
+                        selectedColor: Colors.black87.withOpacity(0.70),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10.0)),
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 1.5,
+                          ),
+                        ),
+                        initialChildSize: 0.4,
+                        listType: MultiSelectListType.CHIP,
+                        searchable: true,
+                        buttonText: Text("Time(s)",
+                            style:
+                                TextStyle(fontSize: 16, color: global.aColor)),
+                        title: const Text(
+                          "Time(s)",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        items: times,
+                        onConfirm: (values) {
+                          selectedTimes =
+                              values.map((e) => e.toString()).toList();
+                        },
+                        chipDisplay: MultiSelectChipDisplay.none(),
                       ),
-                      items: daysOfWeek,
-                      onConfirm: (values) {
-                        selectedDays = values.map((e) => e.toString()).toList();
-                      },
-                      chipDisplay: MultiSelectChipDisplay.none(),
                     ),
-                  ),
-                if (dayError == true) const SizedBox(height: 5),
-                if (dayError == false) const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 15),
-                  child: MultiSelectBottomSheetField(
-                    buttonIcon: Icon(Icons.arrow_drop_down, color: global.aColor,),
-                    validator: (List<dynamic>? value) {
-                      if (value!.isEmpty) {
-                        setState(() {
-                          timeError = true;
-                        });
-                        return 'Select atleast one time';
-                      } else {
-                        setState(() {
-                          timeError = false;
-                        });
-                        return null;
-                      }
-                    },
-                    selectedColor: Colors.black87.withOpacity(0.70),
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(10.0)),
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1.5,
+                    SizedBox(
+                      width: 70,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            foregroundColor: global.aColor,
+                            backgroundColor: global.bColor.withOpacity(0.0001),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              side:
+                                  BorderSide(color: global.cColor, width: 1.5),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            elevation: 0 // Text color
+                            ),
+                        onPressed: () {
+                          // Code for navigating to create/manage timetable screen
+                          if (addedDays.length < 7 &&
+                              selectedTimes.isNotEmpty) {
+                            setState(() {
+                              addedDays.add(_dayValue);
+                              activity.timeOfDayMap[_dayValue] =
+                                  selectedTimes.map((timeString) {
+                                DateTime dateTime =
+                                    DateFormat('HH:mm').parse(timeString);
+                                return TimeOfDay.fromDateTime(dateTime);
+                              }).toList();
+                            });
+                          }
+
+                          if (selectedTimes.isEmpty) {
+                            showMessage(
+                                'Please select time(s) for $_dropdownValue',
+                                'Select time');
+                          }
+                        },
+                        child: Text(
+                          'Add',
+                          style: TextStyle(
+                              color: global.aColor,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                    initialChildSize: 0.4,
-                    listType: MultiSelectListType.CHIP,
-                    searchable: true,
-                    buttonText: Text("Time(s)",
-                        style: TextStyle(fontSize: 16, color: global.aColor)),
-                    title: const Text(
-                      "Times",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    items: times,
-                    onConfirm: (values) {
-                      selectedTimes = values.map((e) => e.toString()).toList();
-                    },
-                    chipDisplay: MultiSelectChipDisplay.none(),
-                  ),
+                  ],
                 ),
-                if (timeError == true)
+                /*if (timeError == true)
                   const SizedBox(
                     height: 5,
                   ),
                 if (timeError == false)
                   const SizedBox(
                     height: 22,
+                  ),*/
+                SizedBox(height: 10),
+                SizedBox(
+                  height: 55,
+                  width: MediaQuery.of(context).size.width - 37,
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    children: [
+                      AddedItemList(
+                          itemTitles: addedDays,
+                          timeOfDayMap: activity.timeOfDayMap),
+                    ],
                   ),
+                ),
+                SizedBox(
+                  height: kVertSpacing,
+                ),
                 SizedBox(
                   height: 40,
                   width: 100,
@@ -626,48 +725,39 @@ class _AddTaskState extends State<AddTask> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        Activity activity;
                         if (_dropdownValue == 'Class') {
-                          activity = Activity(
-                            titleController.text,
-                            locationController.text,
-                            instructorController.text,
-                            selectedTimes.map((timeString) {
-                              DateTime dateTime =
-                                  DateFormat('HH:mm').parse(timeString);
-                              return TimeOfDay.fromDateTime(dateTime);
-                            }).toList(),
-                            selectedDays,
-                            _dropdownValue!,
-                            DateTime.parse(startDateController.text),
-                            DateTime.parse(endDateController.text),
-                          );
-                          List<Activity> activities = provider.activityList;
+                          activity.title = titleController.text;
+                          activity.location = locationController.text;
+                          activity.instructor = instructorController.text;
+                          activity.type = _dropdownValue!;
+                          activity.startDate =
+                              DateTime.parse(startDateController.text);
+                          activity.endDate =
+                              DateTime.parse(endDateController.text);
+                          List<Activity2> activities = provider.activityList;
                           activities.add(activity);
-                          await TimetableFile().saveActivities(activities);
+                          await TimetableFile2().saveActivities(activities);
                           provider.updateActivityList(activities);
+                          showMessage('$_dropdownValue was successful added',
+                              'Added $_dropdownValue');
                         } else {
-                          activity = Activity(
-                            titleController.text,
-                            locationController.text,
-                            instructorController.text,
-                            selectedTimes.map((timeString) {
-                              DateTime dateTime =
-                                  DateFormat('HH:mm').parse(timeString);
-                              return TimeOfDay.fromDateTime(dateTime);
-                            }).toList(),
-                            ['x'],
-                            _dropdownValue!,
-                            DateTime.parse(startDateController.text),
-                            DateTime(2090, 4, 30),
-                          );
-                          List<Activity> activities = await TimetableFile()
-                              .readActivitiesFromJsonFile();
+                          activity.title = titleController.text;
+                          activity.location = locationController.text;
+                          activity.instructor = instructorController.text;
+                          activity.type = _dropdownValue!;
+                          activity.startDate =
+                              DateTime.parse(startDateController.text);
+                          activity.endDate =
+                              DateTime.parse(startDateController.text);
+                          activity.timeOfDayMap =
+                              replaceKeysInTimeOfDayMap(activity);
+                          List<Activity2> activities = provider.activityList;
                           activities.add(activity);
-                          await TimetableFile().saveActivities(activities);
+                          await TimetableFile2().saveActivities(activities);
                           provider.updateActivityList(activities);
+                          showMessage('$_dropdownValue was successful added',
+                              'Added $_dropdownValue');
                         }
-                        Navigator.pop(context);
                       }
                     },
                     child: Text(
@@ -680,5 +770,37 @@ class _AddTaskState extends State<AddTask> {
             ),
           )),
     );
+  }
+
+  void showMessage(String message, String title) {
+    AlertDialog inputFail = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK')),
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return inputFail;
+      },
+    );
+  }
+
+  Map<String, List<TimeOfDay>> replaceKeysInTimeOfDayMap(Activity2 activity) {
+    Map<String, List<TimeOfDay>> newTimeOfDayMap = {};
+
+    activity.timeOfDayMap.forEach((key, value) {
+      String newKey =
+          daysOfWeek[DateTime.parse(startDateController.text).weekday - 1];
+      newTimeOfDayMap[newKey] = value;
+    });
+
+    return newTimeOfDayMap;
   }
 }

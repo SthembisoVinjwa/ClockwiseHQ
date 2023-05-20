@@ -5,8 +5,9 @@ import 'package:clockwisehq/screens/settingDialog.dart';
 import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../file2.dart';
 import '../file_handling.dart';
-import '../timetable/activity.dart';
+import '../timetable/activity2.dart';
 import 'package:provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
@@ -21,7 +22,7 @@ class _HomeState extends State<Home> {
   final ScrollController scrollController = ScrollController();
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
-  List<Activity> myActivities = [];
+  List<Activity2> myActivities = [];
   bool _isLoadingActivities = false;
 
   static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -64,8 +65,11 @@ class _HomeState extends State<Home> {
     setState(() {
       _isLoadingActivities = true;
     });
-    List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
+    List<Activity2> acts = await TimetableFile2().readActivitiesFromJsonFile();
     Provider.of<MainProvider>(context, listen: false).updateActivityList(acts);
+    if (acts.length <= 1) {
+      TimetableFile2().clearFile();
+    }
     setState(() {
       _isLoadingActivities = false;
     });
@@ -79,50 +83,67 @@ class _HomeState extends State<Home> {
     return "$day/$month/$year";
   }
 
+  // Comparison function for sorting TimeOfDay values
+  int _compareTimeOfDay(TimeOfDay a, TimeOfDay b) {
+    if (a.hour < b.hour) {
+      return -1;
+    } else if (a.hour > b.hour) {
+      return 1;
+    } else {
+      return a.minute.compareTo(b.minute);
+    }
+  }
+
   List<Widget> tasks(DateTime day) {
-    List<Activity> activities = myActivities
+    List<Activity2> activities = myActivities
         .where((activity) =>
             day.isAfter(activity.startDate) && day.isBefore(activity.endDate) ||
             day.isAtSameMomentAs(activity.startDate) ||
             day.isAtSameMomentAs(activity.endDate))
         .toList();
 
-    for (int i = 0; i < activities.length; i++) {
-      if (activities[i].daysOfWeek.contains("x")) {
-        activities[i].daysOfWeek = [
-          daysOfWeek[activities[i].startDate.weekday - 1]
-        ];
-      }
-    }
-
     List<Widget> widgets = [];
-    bool atleastOne = false;
+    bool atLeastOne = false;
 
     if (activities.isEmpty) {
-      widgets.add(SizedBox(
-        width: 300,
-        child: ListTile(
-          leading: Icon(
-            Icons.free_cancellation_sharp,
-            color: global.cColor,
-          ),
-          title: Text(
-            "No classes/events",
-            style: TextStyle(color: global.aColor),
+      widgets.add(
+        SizedBox(
+          width: 300,
+          child: ListTile(
+            leading: Icon(
+              Icons.free_cancellation_sharp,
+              color: global.cColor,
+            ),
+            title: Text(
+              "No classes/events",
+              style: TextStyle(color: global.aColor),
+            ),
           ),
         ),
-      ));
+      );
     } else {
-      for (final time in timesOfDay) {
-        String title = activities
-            .where((activity) =>
-                activity.daysOfWeek.contains(daysOfWeek[day.weekday - 1]) &&
-                activity.times.contains(time))
-            .map((activity) => activity.title)
-            .join('\n');
-        if (title.isNotEmpty) {
-          atleastOne = true;
-          widgets.add(SizedBox(
+      Map<TimeOfDay, String> entries = {};
+
+      for (Activity2 activity in activities) {
+
+        activity.timeOfDayMap.forEach((key, value) {
+          if (key == daysOfWeek[day.weekday - 1]) {
+            atLeastOne = true;
+            String title = activity.title;
+            for (var time in value) {
+              entries.putIfAbsent(time, () => title);
+            }
+          }
+        });
+      }
+
+      List<MapEntry<TimeOfDay, String>> sortedEntries = entries.entries.toList()
+        ..sort((a, b) => _compareTimeOfDay(a.key, b.key));
+
+      for (var entry in sortedEntries) {
+        String timeStr = '${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}';
+        widgets.add(
+          SizedBox(
             width: 300,
             child: ListTile(
               leading: Icon(
@@ -131,32 +152,34 @@ class _HomeState extends State<Home> {
                 color: global.cColor,
               ),
               title: Text(
-                title,
+                entry.value,
                 style: TextStyle(color: global.aColor),
               ),
               subtitle: Text(
-                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${(time.hour + 1).toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                timeStr,
                 style: TextStyle(color: global.aColor),
               ),
             ),
-          ));
-        }
+          ),
+        );
       }
-      if (atleastOne == false) {
-        widgets.add(SizedBox(
-          width: 300,
-          child: ListTile(
-            leading: Icon(
-              Icons.free_cancellation_sharp,
-              size: 27.0,
-              color: global.cColor,
-            ),
-            title: Text(
-              'No classes/events',
-              style: TextStyle(color: global.aColor),
+      if (!atLeastOne) {
+        widgets.add(
+          SizedBox(
+            width: 300,
+            child: ListTile(
+              leading: Icon(
+                Icons.free_cancellation_sharp,
+                size: 27.0,
+                color: global.cColor,
+              ),
+              title: Text(
+                'No classes/events',
+                style: TextStyle(color: global.aColor),
+              ),
             ),
           ),
-        ));
+        );
       }
     }
     return widgets;
@@ -171,58 +194,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /*final List<Activity> activities = [
-    Activity(
-      'Maths 244',
-      'Jan Mouton',
-      'Dr. Gray',
-      [const TimeOfDay(hour: 10, minute: 0)],
-      ['Mon', 'Wed', 'Fri'],
-      'class',
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'Com Sci 344',
-      'Enginerring building room A303',
-      'Willem Bester',
-      [
-        const TimeOfDay(hour: 9, minute: 0),
-        const TimeOfDay(hour: 10, minute: 0),
-        const TimeOfDay(hour: 14, minute: 0)
-      ],
-      ['Tue', 'Thu'],
-      'class',
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'GIT 312',
-      'Geology Building',
-      'Dr. Stuurman',
-      [
-        const TimeOfDay(hour: 19, minute: 0),
-        const TimeOfDay(hour: 20, minute: 0)
-      ],
-      ['Mon', 'Wed'],
-      'class',
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'GTH 302',
-      'Geology Building',
-      'Dr. Stuurman',
-      [
-        const TimeOfDay(hour: 19, minute: 0),
-      ],
-      ['x'],
-      'event',
-      DateTime(2023, 4, 25),
-      DateTime(2023, 4, 30),
-    ),
-  ];*/
-
   @override
   void initState() {
     super.initState();
@@ -236,10 +207,10 @@ class _HomeState extends State<Home> {
 
     if (provider.isDarkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black87;
+      global.bColor = Colors.black;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black87;
+      global.aColor = Colors.black;
     }
 
     return Scaffold(
@@ -251,7 +222,7 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               DrawerHeader(
                 decoration: BoxDecoration(
-                  color: global.aColor,
+                  color: global.bColor,
                 ),
                 child: Container(
                   alignment: Alignment.topLeft,
@@ -259,12 +230,12 @@ class _HomeState extends State<Home> {
                     children: [
                       Icon(
                         Icons.access_time_filled_outlined,
-                        color: global.bColor,
+                        color: global.aColor,
                       ),
                       Text(
                         'ClockwiseHQ',
                         style: TextStyle(
-                          color: global.bColor,
+                          color: global.aColor,
                           fontSize: 22.0,
                         ),
                       ),

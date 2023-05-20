@@ -19,10 +19,10 @@ class _ViewTimetableState extends State<ViewTimetable> {
 
     if (provider.isDarkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black87;
+      global.bColor = Colors.black;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black87;
+      global.aColor = Colors.black;
     }
 
     return Scaffold(

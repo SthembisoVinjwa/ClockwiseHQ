@@ -1,4 +1,4 @@
-import 'package:clockwisehq/file_handling.dart';
+import 'package:clockwisehq/file2.dart';
 import 'package:clockwisehq/provider/provider.dart';
 import 'package:clockwisehq/timetable/add.dart';
 import 'package:clockwisehq/timetable/arrow_text.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'activity.dart';
+import 'activity2.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
 class Timetable extends StatefulWidget {
@@ -21,7 +21,7 @@ class _TimetableState extends State<Timetable> {
   bool _isAdLoaded = false;
   String? _dropdownValue;
   bool set = false;
-  late List<Activity> myActivities;
+  late List<Activity2> myActivities;
   bool _isLoadingActivities = false;
   List<DropdownMenuItem<String>> items = const [
     DropdownMenuItem(
@@ -54,7 +54,9 @@ class _TimetableState extends State<Timetable> {
     TimeOfDay(hour: 22, minute: 0),
   ];
 
-  String _currentText = daysOfWeek[DateTime.now().weekday - 1];
+  String _currentText = daysOfWeek[DateTime
+      .now()
+      .weekday - 1];
 
   void _updateText(String newText) {
     setState(() {
@@ -65,10 +67,10 @@ class _TimetableState extends State<Timetable> {
   @override
   void initState() {
     super.initState();
-    _initBannerAd();
+    //_initBannerAd();
   }
 
-  void _initBannerAd() {
+  /*void _initBannerAd() {
     _bannerAd = BannerAd(
         size: AdSize.banner,
         adUnitId: 'ca-app-pub-7872743903266632/8320653540',
@@ -82,7 +84,7 @@ class _TimetableState extends State<Timetable> {
         request: const AdRequest());
 
     _bannerAd.load();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +93,10 @@ class _TimetableState extends State<Timetable> {
 
     if (provider.isDarkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black87;
+      global.bColor = Colors.black;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black87;
+      global.aColor = Colors.black;
     }
 
     if (set == false) {
@@ -170,70 +172,80 @@ class _TimetableState extends State<Timetable> {
                     ),
                     _dropdownValue != 'Weekly'
                         ? SizedBox(
-                            height: 60,
-                            width: 200,
-                            child: ArrowTextWidget(
-                              texts: const [
-                                'Mon',
-                                'Tue',
-                                'Wed',
-                                'Thu',
-                                'Fri',
-                                'Sat',
-                                'Sun'
-                              ],
-                              onUpdateText: _updateText,
-                              index: DateTime.now().weekday - 1,
-                              textColor: global.aColor,
-                            ),
-                          )
+                      height: 60,
+                      width: 200,
+                      child: ArrowTextWidget(
+                        texts: const [
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat',
+                          'Sun'
+                        ],
+                        onUpdateText: _updateText,
+                        index: DateTime
+                            .now()
+                            .weekday - 1,
+                        textColor: global.aColor,
+                      ),
+                    )
                         : const SizedBox(
-                            height: 60,
-                          ),
+                      height: 60,
+                    ),
                   ],
                 ),
                 if (_isLoadingActivities)
                   Column(
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
+                        height: MediaQuery
+                            .of(context)
+                            .size
+                            .height * 0.3,
                       ),
                       Center(
                           child: CircularProgressIndicator(
-                        color: global.aColor,
-                      )),
+                            color: global.aColor,
+                          )),
                     ],
                   )
-                else if (myActivities.isNotEmpty)
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.grey),
-                    ),
-                    elevation: 6,
-                    child: Container(
-                      color: global.bColor,
-                      height: 605,
-                      width: MediaQuery.of(context).size.width - 50,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
+                else
+                  if (myActivities.isNotEmpty)
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      elevation: 6,
+                      child: Container(
+                        color: global.bColor,
+                        height: 605,
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width - 50,
                         child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: _dropdownValue == 'Weekly'
-                              ? buildWeeklyTable()
-                              : buildDailyTimetable(),
+                          scrollDirection: Axis.vertical,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: _dropdownValue == 'Weekly'
+                                ? buildWeeklyTable()
+                                : buildDailyTimetable(),
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                else
-                  SizedBox(
-                    height: 605,
-                    child: Center(
-                        child: Text(
-                      'No timetable data found',
-                      style: TextStyle(fontSize: 18, color: global.aColor),
-                    )),
-                  )
+                    )
+                  else
+                    SizedBox(
+                      height: 605,
+                      child: Center(
+                          child: Text(
+                            'No timetable data found',
+                            style: TextStyle(
+                                fontSize: 18, color: global.aColor),
+                          )),
+                    )
               ],
             ),
           ),
@@ -247,42 +259,67 @@ class _TimetableState extends State<Timetable> {
     int weekDay = now.weekday;
     DateTime monday = now.subtract(Duration(days: weekDay - 1));
     DateTime sunday = now.add(Duration(days: 7 - weekDay));
-    List<Activity> activeActivities = myActivities
+    List<Activity2> activeActivities = myActivities
         .where((activity) =>
-            activity.type == 'Class' &&
-                now.isAfter(activity.startDate) &&
-                now.isBefore(activity.endDate) ||
-            now.isAtSameMomentAs(activity.startDate) ||
-            now.isAtSameMomentAs(activity.endDate))
+    activity.type == 'Class' &&
+        now.isAfter(activity.startDate) &&
+        now.isBefore(activity.endDate) ||
+        now.isAtSameMomentAs(activity.startDate) ||
+        now.isAtSameMomentAs(activity.endDate))
         .toList();
 
     final events = myActivities.where((activity) =>
-        activity.type == 'Event' &&
+    activity.type == 'Event' &&
         (activity.startDate.isAtSameMomentAs(monday) ||
             activity.startDate.isAtSameMomentAs(monday) ||
             (activity.startDate.isAfter(monday) &&
                 activity.startDate.isBefore(sunday))));
 
     for (final event in events) {
-      event.daysOfWeek = [daysOfWeek[event.startDate.weekday - 1]];
       activeActivities.add(event);
+    }
+
+    List<Activity2> toDisplay = [];
+
+    for (Activity2 activity in activeActivities) {
+      activity.timeOfDayMap.forEach((key, value) {
+        for (final day in daysOfWeek) {
+          if (key == day) {
+            String title = activity.title;
+            for (var time in value) {
+              toDisplay.add(Activity2(
+                  activity.title,
+                  activity.location,
+                  activity.instructor,
+                  {day : [time]},
+                  activity.type,
+                  activity.startDate,
+                  activity.endDate));
+            }
+          }
+        }
+      });
     }
 
     return DataTable(
       border: TableBorder.all(color: Colors.grey),
       columns: [
         const DataColumn(label: Text('')),
-        ...daysOfWeek.map((day) => DataColumn(
+        ...daysOfWeek.map((day) =>
+            DataColumn(
                 label: Text(
-              day,
-              style:
+                  day,
+                  style:
                   TextStyle(fontWeight: FontWeight.bold, color: global.aColor),
-            ))),
+                ))),
       ],
       rows: [
         for (final time in timesOfDay)
           DataRow(cells: [
-            DataCell(Text(time.format(context), style: TextStyle(color: global.aColor),)),
+            DataCell(Text(
+              time.format(context),
+              style: TextStyle(color: global.aColor),
+            )),
             for (final day in daysOfWeek)
               DataCell(Container(
                 alignment: Alignment.center,
@@ -291,10 +328,10 @@ class _TimetableState extends State<Timetable> {
                   maxLines: 3,
                   style: TextStyle(fontSize: 12, color: global.aColor),
                   overflow: TextOverflow.ellipsis,
-                  activeActivities
+                  toDisplay
                       .where((activity) =>
-                          activity.daysOfWeek.contains(day) &&
-                          activity.times.contains(time))
+                  activity.timeOfDayMap.containsKey(day) &&
+                      activity.timeOfDayMap[day]!.contains(time))
                       .map((activity) => activity.title)
                       .join('\n'),
                 ),
@@ -309,25 +346,46 @@ class _TimetableState extends State<Timetable> {
     int weekDay = now.weekday;
     DateTime monday = now.subtract(Duration(days: weekDay - 1));
     DateTime sunday = now.add(Duration(days: 7 - weekDay));
-    List<Activity> activeActivities = myActivities
+    List<Activity2> activeActivities = myActivities
         .where((activity) =>
-            activity.type == 'Class' &&
-                now.isAfter(activity.startDate) &&
-                now.isBefore(activity.endDate) ||
-            now.isAtSameMomentAs(activity.startDate) ||
-            now.isAtSameMomentAs(activity.endDate))
+    activity.type == 'Class' &&
+        now.isAfter(activity.startDate) &&
+        now.isBefore(activity.endDate) ||
+        now.isAtSameMomentAs(activity.startDate) ||
+        now.isAtSameMomentAs(activity.endDate))
         .toList();
 
     final events = myActivities.where((activity) =>
-        activity.type == 'Event' &&
+    activity.type == 'Event' &&
         (activity.startDate.isAtSameMomentAs(monday) ||
             activity.startDate.isAtSameMomentAs(monday) ||
             (activity.startDate.isAfter(monday) &&
                 activity.startDate.isBefore(sunday))));
 
     for (final event in events) {
-      event.daysOfWeek = [daysOfWeek[event.startDate.weekday - 1]];
       activeActivities.add(event);
+    }
+
+    List<Activity2> toDisplay = [];
+
+    for (Activity2 activity in activeActivities) {
+      activity.timeOfDayMap.forEach((key, value) {
+        for (final day in daysOfWeek) {
+          if (key == day) {
+            String title = activity.title;
+            for (var time in value) {
+              toDisplay.add(Activity2(
+                  activity.title,
+                  activity.location,
+                  activity.instructor,
+                  {day : [time]},
+                  activity.type,
+                  activity.startDate,
+                  activity.endDate));
+            }
+          }
+        }
+      });
     }
 
     final currentDay = [_currentText];
@@ -341,19 +399,25 @@ class _TimetableState extends State<Timetable> {
       rows: [
         for (final time in timesOfDay)
           DataRow(cells: [
-            DataCell(Text(time.format(context), style: TextStyle(color: global.aColor),)),
+            DataCell(Text(
+              time.format(context),
+              style: TextStyle(color: global.aColor),
+            )),
             for (final day in currentDay)
               DataCell(Container(
-                width: MediaQuery.of(context).size.width - 189,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width - 189,
                 alignment: Alignment.center,
                 child: Text(
                   maxLines: 3,
                   style: TextStyle(fontSize: 14, color: global.aColor),
                   overflow: TextOverflow.ellipsis,
-                  activeActivities
+                  toDisplay
                       .where((activity) =>
-                          activity.daysOfWeek.contains(day) &&
-                          activity.times.contains(time))
+                  activity.timeOfDayMap.containsKey(day) &&
+                      activity.timeOfDayMap[day]!.contains(time))
                       .map((activity) => activity.title)
                       .join('\n'),
                 ),

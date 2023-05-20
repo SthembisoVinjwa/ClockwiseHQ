@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           brightness: Brightness.light,
           primarySwatch: Colors.grey,
-          hoverColor: Colors.black87,
-          indicatorColor: Colors.black87,
+          hoverColor: Colors.black,
+          indicatorColor: Colors.black,
         ),
         debugShowCheckedModeBanner: false,
         home: Home(),
