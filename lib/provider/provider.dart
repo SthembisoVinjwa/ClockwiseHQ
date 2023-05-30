@@ -1,17 +1,24 @@
 import 'package:flutter/foundation.dart';
 
-import '../file2.dart';
-import '../timetable/activity2.dart';
+import '../file.dart';
+import '../timetable/activity.dart';
 
 class MainProvider with ChangeNotifier {
-  List<Activity2> _activityList = [];
-  bool _darkMode = false;
+  List<Activity> _activityList = [];
+  bool _darkMode = true;
+  Map<Activity, bool> _attendanceMap = {};
 
-  List<Activity2> get activityList => _activityList;
+  List<Activity> get activityList => _activityList;
   bool get isDarkMode => _darkMode;
+  Map<Activity, bool> get attendance => _attendanceMap;
 
-  void updateActivityList(List<Activity2> newActivityList) {
+  void updateActivityList(List<Activity> newActivityList) {
     _activityList = newActivityList;
+    notifyListeners();
+  }
+
+  void updateAttendanceMap(Map<Activity, bool> attendanceList) {
+    _attendanceMap = attendanceList;
     notifyListeners();
   }
 

@@ -1,6 +1,6 @@
-import 'package:clockwisehq/components/AddedItemList.dart';
+import 'package:clockwisehq/components/addedItemList.dart';
 import 'package:clockwisehq/components/textfield.dart';
-import 'package:clockwisehq/file2.dart';
+import 'package:clockwisehq/file.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../components/dayTimePicker.dart';
 import '../provider/provider.dart';
 import '../screens/settingDialog.dart';
-import 'activity2.dart';
+import 'activity.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
 class AddTask extends StatefulWidget {
@@ -28,7 +28,7 @@ class _AddTaskState extends State<AddTask> {
   final instructorController = TextEditingController();
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-  Activity2 activity = Activity2('', '', '', {}, '', DateTime.utc(2000, 10, 16),
+  Activity activity = Activity('', '', '', {}, '', DateTime.utc(2000, 10, 16),
       DateTime.utc(2090, 10, 16));
   String _dropdownValue = 'Class';
   String _dayValue = 'Mon';
@@ -107,13 +107,14 @@ class _AddTaskState extends State<AddTask> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MainProvider>(context);
+    bool darkMode = provider.isDarkMode;
 
-    if (provider.isDarkMode == true) {
+    if (darkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black;
+      global.bColor = Colors.black87;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black;
+      global.aColor = Colors.black87;
     }
 
     return Scaffold(
@@ -715,7 +716,9 @@ class _AddTaskState extends State<AddTask> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       foregroundColor: global.aColor,
-                      backgroundColor: global.bColor,
+                      backgroundColor: darkMode
+                          ? global.bColor.withOpacity(0.25)
+                          : Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -734,9 +737,11 @@ class _AddTaskState extends State<AddTask> {
                               DateTime.parse(startDateController.text);
                           activity.endDate =
                               DateTime.parse(endDateController.text);
-                          List<Activity2> activities = provider.activityList;
+                          List<Activity> activities = provider.activityList;
                           activities.add(activity);
-                          await TimetableFile2().saveActivities(activities);
+                          activity = Activity('', '', '', {}, '', DateTime.utc(2000, 10, 16),
+                              DateTime.utc(2090, 10, 16));
+                          await TimetableFile().saveActivities(activities);
                           provider.updateActivityList(activities);
                           showMessage('$_dropdownValue was successful added',
                               'Added $_dropdownValue');
@@ -751,9 +756,11 @@ class _AddTaskState extends State<AddTask> {
                               DateTime.parse(startDateController.text);
                           activity.timeOfDayMap =
                               replaceKeysInTimeOfDayMap(activity);
-                          List<Activity2> activities = provider.activityList;
+                          List<Activity> activities = provider.activityList;
                           activities.add(activity);
-                          await TimetableFile2().saveActivities(activities);
+                          activity = Activity('', '', '', {}, '', DateTime.utc(2000, 10, 16),
+                              DateTime.utc(2090, 10, 16));
+                          await TimetableFile().saveActivities(activities);
                           provider.updateActivityList(activities);
                           showMessage('$_dropdownValue was successful added',
                               'Added $_dropdownValue');
@@ -774,14 +781,16 @@ class _AddTaskState extends State<AddTask> {
 
   void showMessage(String message, String title) {
     AlertDialog inputFail = AlertDialog(
-      title: Text(title),
+      backgroundColor: global.bColor,
+      title: Text(title, style: TextStyle(color: global.aColor),),
       content: Text(message),
       actions: [
         ElevatedButton(
+          style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(global.bColor)),
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('OK')),
+            child: Text('OK', style: TextStyle(color: global.aColor),)),
       ],
     );
     showDialog(
@@ -792,7 +801,7 @@ class _AddTaskState extends State<AddTask> {
     );
   }
 
-  Map<String, List<TimeOfDay>> replaceKeysInTimeOfDayMap(Activity2 activity) {
+  Map<String, List<TimeOfDay>> replaceKeysInTimeOfDayMap(Activity activity) {
     Map<String, List<TimeOfDay>> newTimeOfDayMap = {};
 
     activity.timeOfDayMap.forEach((key, value) {

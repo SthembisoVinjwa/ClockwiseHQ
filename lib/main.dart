@@ -22,11 +22,11 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           brightness: Brightness.light,
           primarySwatch: Colors.grey,
-          hoverColor: Colors.black,
-          indicatorColor: Colors.black,
+          hoverColor: Colors.black87,
+          indicatorColor: Colors.black87,
         ),
         debugShowCheckedModeBanner: false,
-        home: Home(),
+        home: const Home(),
       ),
     );
   }

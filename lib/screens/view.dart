@@ -5,24 +5,19 @@ import 'package:provider/provider.dart';
 import '../provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
-class ViewTimetable extends StatefulWidget {
+class ViewTimetable extends StatelessWidget {
   const ViewTimetable({Key? key}) : super(key: key);
 
-  @override
-  State<ViewTimetable> createState() => _ViewTimetableState();
-}
-
-class _ViewTimetableState extends State<ViewTimetable> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MainProvider>(context);
 
     if (provider.isDarkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black;
+      global.bColor = Colors.black87;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black;
+      global.aColor = Colors.black87;
     }
 
     return Scaffold(

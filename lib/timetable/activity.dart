@@ -1,111 +1,102 @@
 import 'dart:convert';
-import 'package:clockwisehq/file_handling.dart';
+import 'package:clockwisehq/file.dart';
 import 'package:flutter/material.dart';
 
 class Activity {
-  late String title;
+  String title = '';
   String location = '';
   String instructor = '';
-  late List<TimeOfDay> times;
-  late List<String> daysOfWeek;
-  late String type;
+  late Map<String, List<TimeOfDay>> timeOfDayMap;
+  String type = '';
   late DateTime startDate;
   late DateTime endDate;
 
-  Activity(this.title, this.location, this.instructor, this.times,
-      this.daysOfWeek, this.type, this.startDate, this.endDate);
+  Activity(this.title, this.location, this.instructor, this.timeOfDayMap,
+      this.type, this.startDate, this.endDate);
+
+  @override
+  String toString() {
+    return 'Activity2(title: $title, location: $location, instructor: $instructor, timeOfDayMap: $timeOfDayMap, type: $type, startDate: $startDate, endDate: $endDate)';
+  }
 
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       json['title'],
       json['location'],
       json['instructor'],
-      List<TimeOfDay>.from(json['times'].map((time) { //Time for event
-        final timeParts = time.split(':');
-        return TimeOfDay(
-            hour: int.parse(timeParts[0]), minute: int.parse(timeParts[1]));
+      Map<String, List<TimeOfDay>>.from(json['timeOfDayMap'].map((key, value) {
+        return MapEntry(
+            key,
+            (value as List<dynamic>).map((time) {
+              final timeParts = time.split(':');
+              return TimeOfDay(
+                hour: int.parse(timeParts[0]),
+                minute: int.parse(timeParts[1]),
+              );
+            }).toList());
       })),
-      List<String>.from(json['daysOfWeek']),
       json['type'],
-      DateTime.parse(json['startDate']), // Date for event
+      DateTime.parse(json['startDate']),
       DateTime.parse(json['endDate']),
     );
   }
-}
 
-class ActivityEncoder extends Converter<Activity, String> {
-  final TimeOfDayFormat _timeOfDayFormatter = TimeOfDayFormat();
-
-  @override
-  String convert(Activity activity) {
-    final Map<String, dynamic> json = <String, dynamic>{
-      'title': activity.title,
-      'location': activity.location,
-      'instructor': activity.instructor,
-      'times': activity.times
-          .map((time) => _timeOfDayFormatter.format(time))
-          .toList(),
-      'daysOfWeek': activity.daysOfWeek,
-      'type': activity.type,
-      'startDate': activity.startDate.toIso8601String(),
-      'endDate': activity.endDate.toIso8601String(),
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'location': location,
+      'instructor': instructor,
+      'timeOfDayMap': timeOfDayMap.map((key, value) {
+        return MapEntry(key, value.map(_formatTimeOfDay).toList());
+      }),
+      'type': type,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
     };
-    return jsonEncode(json);
   }
-}
 
-class TimeOfDayFormat {
-  String format(TimeOfDay timeOfDay) {
-    String hour = timeOfDay.hour.toString();
-    String minute = timeOfDay.minute.toString().padLeft(2, '0');
+  String _formatTimeOfDay(TimeOfDay timeOfDay) {
+    final hour = timeOfDay.hour.toString();
+    final minute = timeOfDay.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
   }
+}
+
+void save(List<Activity> acts) async {
+  await TimetableFile().saveActivities(acts);
+}
+
+Future<List<Activity>> read() async {
+  List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
+  return acts;
 }
 
 void main() {
   final List<Activity> activities = [
     Activity(
-      'Maths 244',
-      'Jan Mouton',
-      'Dr. Gray',
-      [const TimeOfDay(hour: 10, minute: 0)],
-      ['Mon', 'Wed', 'Fri'],
+      'class1',
+      'home',
+      'Mr',
+      {'Mon': [TimeOfDay(hour: 7, minute: 30)]},
       'class',
       DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
+      DateTime(2023, 8, 1),
     ),
     Activity(
-      'Com Sci 344',
-      'Enginerring building room A303',
-      'Willem Bester',
-      [
-        const TimeOfDay(hour: 9, minute: 0),
-        const TimeOfDay(hour: 10, minute: 0),
-        const TimeOfDay(hour: 14, minute: 0)
-      ],
-      ['Tue', 'Thu'],
+      'class1',
+      'home',
+      'Mr',
+      {
+        'Mon': [TimeOfDay(hour: 7, minute: 30)],
+        'Wed': [TimeOfDay(hour: 10, minute: 30)]
+      },
       'class',
       DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
-    ),
-    Activity(
-      'GIT 312',
-      'Geology Building',
-      'Dr. Stuurman',
-      [
-        const TimeOfDay(hour: 19, minute: 0),
-        const TimeOfDay(hour: 20, minute: 0)
-      ],
-      ['Mon', 'Wed'],
-      'class',
-      DateTime(2023, 4, 1),
-      DateTime(2023, 4, 30),
+      DateTime(2023, 8, 1),
     ),
   ];
 
-  TimetableFile().saveActivities(activities);
-
-  final json = activities.map((e) => ActivityEncoder().convert(e)).toList();
-  final List<Activity> myActivities =
-      json.map((e) => Activity.fromJson(jsonDecode(e))).toList();
+  // Save and read the activities as before
+  // save(activities);
+  // read().then((value) => print(value.last.title));
 }

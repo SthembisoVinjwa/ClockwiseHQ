@@ -5,9 +5,8 @@ import 'package:clockwisehq/screens/settingDialog.dart';
 import 'package:clockwisehq/screens/view.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../file2.dart';
-import '../file_handling.dart';
-import '../timetable/activity2.dart';
+import '../file.dart';
+import '../timetable/activity.dart';
 import 'package:provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 
@@ -22,7 +21,7 @@ class _HomeState extends State<Home> {
   final ScrollController scrollController = ScrollController();
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
-  List<Activity2> myActivities = [];
+  List<Activity> myActivities = [];
   bool _isLoadingActivities = false;
 
   static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -65,10 +64,10 @@ class _HomeState extends State<Home> {
     setState(() {
       _isLoadingActivities = true;
     });
-    List<Activity2> acts = await TimetableFile2().readActivitiesFromJsonFile();
+    List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
     Provider.of<MainProvider>(context, listen: false).updateActivityList(acts);
     if (acts.length <= 1) {
-      TimetableFile2().clearFile();
+      TimetableFile().clearFile();
     }
     setState(() {
       _isLoadingActivities = false;
@@ -94,8 +93,8 @@ class _HomeState extends State<Home> {
     }
   }
 
-  List<Widget> tasks(DateTime day) {
-    List<Activity2> activities = myActivities
+  List<Widget> tasks(DateTime day, bool darkMode) {
+    List<Activity> activities = myActivities
         .where((activity) =>
             day.isAfter(activity.startDate) && day.isBefore(activity.endDate) ||
             day.isAtSameMomentAs(activity.startDate) ||
@@ -110,13 +109,13 @@ class _HomeState extends State<Home> {
         SizedBox(
           width: 300,
           child: ListTile(
-            leading: Icon(
+            leading: const Icon(
               Icons.free_cancellation_sharp,
-              color: global.cColor,
+              color: Colors.grey,
             ),
             title: Text(
               "No classes/events",
-              style: TextStyle(color: global.aColor),
+              style: TextStyle(color: global.aColor,),
             ),
           ),
         ),
@@ -124,7 +123,7 @@ class _HomeState extends State<Home> {
     } else {
       Map<TimeOfDay, String> entries = {};
 
-      for (Activity2 activity in activities) {
+      for (Activity activity in activities) {
 
         activity.timeOfDayMap.forEach((key, value) {
           if (key == daysOfWeek[day.weekday - 1]) {
@@ -141,23 +140,24 @@ class _HomeState extends State<Home> {
         ..sort((a, b) => _compareTimeOfDay(a.key, b.key));
 
       for (var entry in sortedEntries) {
-        String timeStr = '${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}';
+        String nextHour = ((entry.key.hour + 1)%24).toString();
+        String timeStr = '${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')} - ${nextHour.padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}';
         widgets.add(
           SizedBox(
             width: 300,
             child: ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.calendar_today_sharp,
                 size: 24,
-                color: global.cColor,
+                color: Colors.grey,
               ),
               title: Text(
-                entry.value,
-                style: TextStyle(color: global.aColor),
+                entry.value[0].toUpperCase() + entry.value.substring(1),
+                style: TextStyle(color: global.aColor,),
               ),
               subtitle: Text(
                 timeStr,
-                style: TextStyle(color: global.aColor),
+                style: TextStyle(color: global.aColor,),
               ),
             ),
           ),
@@ -168,14 +168,14 @@ class _HomeState extends State<Home> {
           SizedBox(
             width: 300,
             child: ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.free_cancellation_sharp,
                 size: 27.0,
-                color: global.cColor,
+                color: Colors.grey,
               ),
               title: Text(
                 'No classes/events',
-                style: TextStyle(color: global.aColor),
+                style: TextStyle(color: global.aColor,),
               ),
             ),
           ),
@@ -185,12 +185,12 @@ class _HomeState extends State<Home> {
     return widgets;
   }
 
-  Widget timetableForDay(DateTime day, context) {
+  Widget timetableForDay(DateTime day, context, bool darkMode) {
     return ListView(
       controller: scrollController,
       scrollDirection: Axis.horizontal,
       shrinkWrap: true,
-      children: tasks(day),
+      children: tasks(day, darkMode),
     );
   }
 
@@ -204,17 +204,17 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MainProvider>(context);
     myActivities = provider.activityList;
+    bool darkMode = provider.isDarkMode;
 
-    if (provider.isDarkMode == true) {
+    if (darkMode == true) {
       global.aColor = Colors.white;
-      global.bColor = Colors.black;
+      global.bColor = Colors.black87;
     } else {
       global.bColor = Colors.white;
-      global.aColor = Colors.black;
+      global.aColor = Colors.black87;
     }
 
     return Scaffold(
-        backgroundColor: global.bColor,
         drawer: Drawer(
           backgroundColor: global.bColor,
           child: ListView(
@@ -222,7 +222,7 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               DrawerHeader(
                 decoration: BoxDecoration(
-                  color: global.bColor,
+                  color: global.aColor,
                 ),
                 child: Container(
                   alignment: Alignment.topLeft,
@@ -230,13 +230,13 @@ class _HomeState extends State<Home> {
                     children: [
                       Icon(
                         Icons.access_time_filled_outlined,
-                        color: global.aColor,
+                        color: global.bColor,
                       ),
                       Text(
-                        'ClockwiseHQ',
+                        "  Timetable & Attendance",
                         style: TextStyle(
-                          color: global.aColor,
-                          fontSize: 22.0,
+                          color: global.bColor,
+                          fontSize: 18.0,
                         ),
                       ),
                     ],
@@ -346,9 +346,9 @@ class _HomeState extends State<Home> {
                   color: global.aColor,
                 ),
                 Text(
-                  "ClockwiseHQ",
+                  "  Timetable & Attendance",
                   style: TextStyle(
-                    fontSize: 18.0,
+                    fontSize: 14.0,
                     color: global.aColor,
                   ),
                 ),
@@ -412,6 +412,7 @@ class _HomeState extends State<Home> {
             Expanded(
               flex: 3,
               child: Container(
+                color: global.bColor,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
@@ -469,7 +470,7 @@ class _HomeState extends State<Home> {
                       child: SizedBox(
                         width: 320,
                         child: Card(
-                          color: global.bColor,
+                          color: darkMode ? Colors.black87.withOpacity(0) : Colors.white,
                           elevation: 1.0,
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
@@ -506,7 +507,7 @@ class _HomeState extends State<Home> {
                                           color: global.aColor,
                                         ),
                                       )
-                                    : timetableForDay(_focusedDay, context),
+                                    : timetableForDay(_focusedDay, context, darkMode),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -546,7 +547,7 @@ class _HomeState extends State<Home> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     const SizedBox(
-                      height: 30,
+                      height: 33,
                     ),
                     SizedBox(
                       width: 310,
@@ -554,7 +555,7 @@ class _HomeState extends State<Home> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: global.aColor,
-                          backgroundColor: global.bColor,
+                          backgroundColor: darkMode ? Colors.black87.withOpacity(0) : Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
@@ -585,7 +586,7 @@ class _HomeState extends State<Home> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: global.aColor,
-                          backgroundColor: global.bColor,
+                          backgroundColor: darkMode ? Colors.black87.withOpacity(0) : Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
@@ -617,7 +618,7 @@ class _HomeState extends State<Home> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: global.aColor,
-                          backgroundColor: global.bColor,
+                          backgroundColor: darkMode ? Colors.black87.withOpacity(0) : Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
@@ -649,7 +650,7 @@ class _HomeState extends State<Home> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: global.aColor,
-                          backgroundColor: global.bColor,
+                          backgroundColor: darkMode ? Colors.black87.withOpacity(0) : Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(

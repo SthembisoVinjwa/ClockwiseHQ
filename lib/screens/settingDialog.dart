@@ -38,7 +38,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
         ListTile(
-          title: Text('Allow notifications'),
+          title: Text('Notifications'),
           trailing: Switch(
             activeTrackColor: Colors.grey,
             activeColor: Colors.black87,
