@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 import '../attendance/entry.dart';
+import '../export/pdfapi.dart';
 import '../provider/provider.dart';
 import '../screens/export.dart';
 import '../timetable/activity.dart';
@@ -21,9 +22,18 @@ class _RecordsState extends State<Records> {
   List<AttendanceEntry> entries = [];
   static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  Future<void> _readAttendance() async {
+    if (entries.isEmpty) {
+      final attendance = await AttendanceFile().readAttendance();
+      Provider.of<MainProvider>(context, listen: false)
+          .updateAttendanceEntries(attendance);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _readAttendance();
   }
 
   String formatDate(DateTime date) {
@@ -58,18 +68,22 @@ class _RecordsState extends State<Records> {
           style: ElevatedButton.styleFrom(
             foregroundColor: global.aColor,
             backgroundColor:
-            darkMode ? Colors.black87.withOpacity(0.25) : Colors.white,
+                darkMode ? Colors.black87.withOpacity(0.25) : Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             shape: RoundedRectangleBorder(
               side: BorderSide(color: global.aColor),
               borderRadius: BorderRadius.circular(15),
             ), // Text color
           ),
-          onPressed: () {
+          onPressed: () async {
+            final pdfFile =
+                await PdfApi.exportAttendanceEntries(entries);
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const Export()),
+                  builder: (context) => Export(
+                        file: pdfFile,
+                      )),
             );
           },
           child: const Text('Generate PDF'),
@@ -92,8 +106,7 @@ class _RecordsState extends State<Records> {
 
             return ListTile(
               title: Text(
-                activity.title[0].toUpperCase() +
-                    activity.title.substring(1),
+                activity.title[0].toUpperCase() + activity.title.substring(1),
                 style: TextStyle(
                   color: global.aColor,
                 ),
@@ -102,7 +115,12 @@ class _RecordsState extends State<Records> {
                 '${formatDate(entries[index].date)} @ ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${nextHour.padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
                 style: TextStyle(color: global.cColor),
               ),
-              trailing: entries[index].attendance ? Icon(Icons.check, color: global.aColor,) : Icon(Icons.close, color: global.aColor),
+              trailing: entries[index].attendance
+                  ? Icon(
+                      Icons.check,
+                      color: global.aColor,
+                    )
+                  : Icon(Icons.close, color: global.aColor),
             );
           },
         ),

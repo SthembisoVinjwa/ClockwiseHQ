@@ -7,7 +7,8 @@ import 'package:clockwisehq/global/global.dart' as global;
 import '../provider/provider.dart';
 
 class Export extends StatefulWidget {
-  const Export({Key? key}) : super(key: key);
+  final file;
+  const Export({Key? key, required this.file}) : super(key: key);
 
   @override
   State<Export> createState() => _ExportState();
@@ -44,7 +45,7 @@ class _ExportState extends State<Export> {
               },
             ),
             title: Text(
-              "Export to PDF",
+              "Generate PDF",
               style: TextStyle(fontSize: 18.0, color: global.aColor),
             ),
             actions: [
@@ -65,7 +66,7 @@ class _ExportState extends State<Export> {
               )
             ]),
       ),
-      body: const ExportAttendance(),
+      body: ExportAttendance(file: widget.file),
     );
   }
 }
