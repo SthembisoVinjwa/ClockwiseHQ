@@ -1,3 +1,4 @@
+import 'package:clockwisehq/attendance/entry.dart';
 import 'package:flutter/foundation.dart';
 
 import '../file.dart';
@@ -6,19 +7,19 @@ import '../timetable/activity.dart';
 class MainProvider with ChangeNotifier {
   List<Activity> _activityList = [];
   bool _darkMode = true;
-  Map<Activity, bool> _attendanceMap = {};
+  List<AttendanceEntry> _attendanceEntries = [];
 
   List<Activity> get activityList => _activityList;
   bool get isDarkMode => _darkMode;
-  Map<Activity, bool> get attendance => _attendanceMap;
+  List<AttendanceEntry> get attendance => _attendanceEntries;
 
   void updateActivityList(List<Activity> newActivityList) {
     _activityList = newActivityList;
     notifyListeners();
   }
 
-  void updateAttendanceMap(Map<Activity, bool> attendanceList) {
-    _attendanceMap = attendanceList;
+  void updateAttendanceEntries(List<AttendanceEntry> attendanceEntries) {
+    _attendanceEntries = attendanceEntries;
     notifyListeners();
   }
 

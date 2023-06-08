@@ -12,7 +12,7 @@ class TimetableFile {
 
     try {
       // Open the file for writing
-      final file = File(filePath).openWrite(mode: FileMode.append);
+      final file = File(filePath).openWrite();
 
       // Write the activities to the file
       file.write(activities.map((e) => jsonEncode(e.toJson())),);
@@ -25,7 +25,7 @@ class TimetableFile {
     }
   }
 
-  void clearFile() async {
+  /*void clearFile() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final filePath = '${directory.path}/activities.json';
@@ -34,7 +34,7 @@ class TimetableFile {
     } catch(e) {
       print(e.toString());
     }
-  }
+  }*/
 
   Future<List<Activity>> readActivitiesFromJsonFile() async {
     try {

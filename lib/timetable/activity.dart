@@ -19,6 +19,10 @@ class Activity {
     return 'Activity2(title: $title, location: $location, instructor: $instructor, timeOfDayMap: $timeOfDayMap, type: $type, startDate: $startDate, endDate: $endDate)';
   }
 
+  bool isDuplicateOf(Activity other) {
+    return title == other.title && location == other.location && instructor == other.instructor;
+  }
+
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       json['title'],

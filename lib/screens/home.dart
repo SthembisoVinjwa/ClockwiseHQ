@@ -66,9 +66,6 @@ class _HomeState extends State<Home> {
     });
     List<Activity> acts = await TimetableFile().readActivitiesFromJsonFile();
     Provider.of<MainProvider>(context, listen: false).updateActivityList(acts);
-    if (acts.length <= 1) {
-      TimetableFile().clearFile();
-    }
     setState(() {
       _isLoadingActivities = false;
     });
@@ -294,6 +291,11 @@ class _HomeState extends State<Home> {
                 onTap: () {
                   Navigator.pop(context);
                   // Navigate to attendance records page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AttendanceRecords()),
+                  );
                 },
               ),
               const Divider(),

@@ -1,9 +1,10 @@
-import 'package:clockwisehq/attendanceFile.dart';
+import 'package:clockwisehq/attendance/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 import '../provider/provider.dart';
 import '../timetable/activity.dart';
+import 'dart:developer';
 
 class Attendance extends StatefulWidget {
   const Attendance({Key? key}) : super(key: key);
@@ -15,62 +16,62 @@ class Attendance extends StatefulWidget {
 class _AttendanceState extends State<Attendance> {
   late DateTime currentDate;
   List<Activity> activities = [];
-  List<Activity> todayActivities = [];
-  Map<Activity, bool> attendanceMap = {};
+  List<AttendanceEntry> entries = [];
   bool showOptions = false;
+  bool firstIteration = true;
   static final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  Future<void> _readAttendance() async {
-    activities = Provider.of<MainProvider>(context, listen: false).activityList;
-    attendanceMap = await AttendanceFile().readAttendance();
-    Provider.of<MainProvider>(context, listen: false)
-        .updateAttendanceMap(attendanceMap);
-    if (attendanceMap.isEmpty) {
-      createAttendance();
-    }
-  }
-
   void createAttendance() {
+    activities = Provider.of<MainProvider>(context, listen: false)
+        .activityList
+        .where((activity) =>
+            currentDate.isAfter(activity.startDate) &&
+                currentDate.isBefore(activity.endDate) ||
+            currentDate.isAtSameMomentAs(activity.startDate) ||
+            currentDate.isAtSameMomentAs(activity.endDate))
+        .toList();
     for (Activity activity in activities) {
       if (activity.title != 'none') {
         activity.timeOfDayMap.forEach((key, value) {
           if (key == daysOfWeek[currentDate.weekday - 1]) {
             String title = activity.title;
             for (var time in value) {
-              todayActivities.add(Activity(
-                  activity.title,
-                  activity.location,
-                  activity.instructor,
-                  {
-                    key: [time]
-                  },
-                  activity.type,
-                  activity.startDate,
-                  activity.endDate));
+              entries.add(AttendanceEntry(
+                  time: time,
+                  date: currentDate,
+                  activity: Activity(
+                      activity.title,
+                      activity.location,
+                      activity.instructor,
+                      {
+                        key: [time]
+                      },
+                      activity.type,
+                      activity.startDate,
+                      activity.endDate),
+                  attendance: false));
             }
           }
         });
       }
     }
-
-    for (Activity activity in todayActivities) {
-      attendanceMap[activity] = false;
-    }
-
-    _saveAttendance();
-    Provider.of<MainProvider>(context, listen: false)
-        .updateAttendanceMap(attendanceMap);
   }
 
   Future<void> _saveAttendance() async {
-    await AttendanceFile().saveAttendance(attendanceMap);
+    if (entries.isNotEmpty) {
+      await AttendanceFile().saveAttendance(entries);
+      final attendance = await AttendanceFile().readAttendance();
+      Provider.of<MainProvider>(context, listen: false).updateAttendanceEntries(attendance);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _readAttendance();
-    currentDate = DateTime.utc(2023, 5, 25);
+    setState(() {
+      currentDate = DateTime.utc(2023, 6, 16);
+      createAttendance();
+    });
   }
 
   void toggleOptions() {
@@ -83,8 +84,6 @@ class _AttendanceState extends State<Attendance> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MainProvider>(context);
     bool darkMode = provider.isDarkMode;
-    attendanceMap = provider.attendance;
-    todayActivities = attendanceMap.keys.toList();
 
     if (darkMode == true) {
       global.aColor = Colors.white;
@@ -111,7 +110,8 @@ class _AttendanceState extends State<Attendance> {
           ),
           onPressed: () {
             _saveAttendance();
-            showMessage('Attendance saved', 'Attendance for ${currentDate.day.toString().padLeft(2, '0')}/${currentDate.month.toString().padLeft(2, '0')}/${currentDate.year}');
+            showMessage('Attendance saved',
+                'Date: ${currentDate.day.toString().padLeft(2, '0')}/${currentDate.month.toString().padLeft(2, '0')}/${currentDate.year}');
           },
           child: const Text('Save'),
         ),
@@ -144,49 +144,51 @@ class _AttendanceState extends State<Attendance> {
                 ),
               ],
             ),
+            TextButton(onPressed: () {setState(() {
+              AttendanceFile().clear();
+            });}, child: Text('Clear')),
             SizedBox(height: 5),
             // Add some spacing between the text and the list
-            ListView.builder(
-              shrinkWrap: true, // Wrap the ListView.builder with a SizedBox
-              itemCount: attendanceMap.keys.length,
-              itemBuilder: (context, index) {
-                final activity = todayActivities[index];
-                final isAttended = attendanceMap[activity] ?? false;
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true, // Wrap the ListView.builder with a SizedBox
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final activity = entries[index].activity;
+                  final isAttended = entries[index].attendance ?? false;
+                  final time = entries[index].time;
+                  String nextHour = ((time.hour + 1) % 24).toString();
 
-                final time = activity.timeOfDayMap.entries.first.value.first;
-                String nextHour = ((time.hour + 1) % 24).toString();
-
-                return ListTile(
-                  title: Text(
-                    activity.title[0].toUpperCase() +
-                        activity.title.substring(1),
-                    style: TextStyle(
-                      color: global.aColor,
+                  return ListTile(
+                    title: Text(
+                      activity.title[0].toUpperCase() +
+                          activity.title.substring(1),
+                      style: TextStyle(
+                        color: global.aColor,
+                      ),
                     ),
-                  ),
-                  subtitle: Text(
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${nextHour.padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} ',
-                    style: TextStyle(color: global.cColor),
-                  ),
-                  trailing: Theme(
-                    data: ThemeData(
-                      unselectedWidgetColor: global.aColor,
+                    subtitle: Text(
+                      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${nextHour.padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} ',
+                      style: TextStyle(color: global.cColor),
                     ),
-                    child: Checkbox(
-                      checkColor: global.bColor,
-                      activeColor: global.aColor,
-                      value: isAttended,
-                      onChanged: (value) {
-                        setState(() {
-                          attendanceMap[activity] = value ?? false;
-                          Provider.of<MainProvider>(context, listen: false)
-                              .updateAttendanceMap(attendanceMap);
-                        });
-                      },
+                    trailing: Theme(
+                      data: ThemeData(
+                        unselectedWidgetColor: global.aColor,
+                      ),
+                      child: Checkbox(
+                        checkColor: global.bColor,
+                        activeColor: global.aColor,
+                        value: isAttended,
+                        onChanged: (value) {
+                          setState(() {
+                            entries[index].attendance = value ?? false;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -197,15 +199,23 @@ class _AttendanceState extends State<Attendance> {
   void showMessage(String message, String title) {
     AlertDialog inputFail = AlertDialog(
       backgroundColor: global.bColor,
-      title: Text(title, style: TextStyle(color: global.aColor),),
+      title: Text(
+        title,
+        style: TextStyle(color: global.aColor),
+      ),
       content: Text(message),
       actions: [
         ElevatedButton(
-            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(global.bColor)),
+            style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(global.bColor)),
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('OK', style: TextStyle(color: global.aColor),)),
+            child: Text(
+              'OK',
+              style: TextStyle(color: global.aColor),
+            )),
       ],
     );
     showDialog(

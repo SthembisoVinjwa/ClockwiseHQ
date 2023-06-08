@@ -1,18 +1,19 @@
+import 'package:clockwisehq/export/exportAttendance.dart';
+import 'package:flutter/material.dart';
 import 'package:clockwisehq/screens/settingDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:clockwisehq/global/global.dart' as global;
 import '../provider/provider.dart';
-import '../records/records.dart';
 
-class AttendanceRecords extends StatefulWidget {
-  const AttendanceRecords({Key? key}) : super(key: key);
+class Export extends StatefulWidget {
+  const Export({Key? key}) : super(key: key);
 
   @override
-  State<AttendanceRecords> createState() => _AttendanceRecordsState();
+  State<Export> createState() => _ExportState();
 }
 
-class _AttendanceRecordsState extends State<AttendanceRecords> {
+class _ExportState extends State<Export> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MainProvider>(context);
@@ -43,7 +44,7 @@ class _AttendanceRecordsState extends State<AttendanceRecords> {
               },
             ),
             title: Text(
-              "Attendance Records",
+              "Export to PDF",
               style: TextStyle(fontSize: 18.0, color: global.aColor),
             ),
             actions: [
@@ -64,7 +65,7 @@ class _AttendanceRecordsState extends State<AttendanceRecords> {
               )
             ]),
       ),
-      body: const Records(),
+      body: const ExportAttendance(),
     );
   }
 }
