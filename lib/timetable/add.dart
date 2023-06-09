@@ -743,7 +743,7 @@ class _AddTaskState extends State<AddTask> {
                               DateTime.utc(2090, 10, 16));
                           await TimetableFile().saveActivities(activities);
                           provider.updateActivityList(activities);
-                          showMessage('$_dropdownValue was successful added',
+                          showMessage('$_dropdownValue was successfully added',
                               'Added $_dropdownValue');
                         } else {
                           activity.title = titleController.text;
@@ -762,7 +762,7 @@ class _AddTaskState extends State<AddTask> {
                               DateTime.utc(2090, 10, 16));
                           await TimetableFile().saveActivities(activities);
                           provider.updateActivityList(activities);
-                          showMessage('$_dropdownValue was successful added',
+                          showMessage('$_dropdownValue was successfully added',
                               'Added $_dropdownValue');
                         }
                       }
@@ -782,15 +782,23 @@ class _AddTaskState extends State<AddTask> {
   void showMessage(String message, String title) {
     AlertDialog inputFail = AlertDialog(
       backgroundColor: global.bColor,
-      title: Text(title, style: TextStyle(color: global.aColor),),
-      content: Text(message),
+      title: Text(
+        title,
+        style: TextStyle(color: global.aColor),
+      ),
+      content: Text(message, style: TextStyle(color: global.aColor)),
       actions: [
         ElevatedButton(
-          style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(global.bColor)),
+            style: ButtonStyle(
+                backgroundColor:
+                MaterialStateProperty.all<Color>(global.aColor)),
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('OK', style: TextStyle(color: global.aColor),)),
+            child: Text(
+              'OK',
+              style: TextStyle(color: global.bColor),
+            )),
       ],
     );
     showDialog(

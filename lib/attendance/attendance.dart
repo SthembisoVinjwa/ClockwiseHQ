@@ -203,18 +203,18 @@ class _AttendanceState extends State<Attendance> {
         title,
         style: TextStyle(color: global.aColor),
       ),
-      content: Text(message),
+      content: Text(message, style: TextStyle(color: global.aColor)),
       actions: [
         ElevatedButton(
             style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(global.bColor)),
+                    MaterialStateProperty.all<Color>(global.aColor)),
             onPressed: () {
               Navigator.of(context).pop();
             },
             child: Text(
               'OK',
-              style: TextStyle(color: global.aColor),
+              style: TextStyle(color: global.bColor),
             )),
       ],
     );

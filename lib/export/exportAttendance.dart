@@ -54,7 +54,8 @@ class _ExportAttendanceState extends State<ExportAttendance> {
                     ), // Text color
                   ),
                   onPressed: () {
-                    print('Saved: ${PdfApi.saveDocument(widget.file)}');
+                    PdfApi().saveToDownloads(widget.file);
+                    showMessage('Attendance report saved to Download', 'Saved');
                   },
                   child: const Text('Save'),
                 ),
@@ -62,5 +63,35 @@ class _ExportAttendanceState extends State<ExportAttendance> {
             ),
           ],
         ));
+  }
+
+  void showMessage(String message, String title) {
+    AlertDialog inputFail = AlertDialog(
+      backgroundColor: global.bColor,
+      title: Text(
+        title,
+        style: TextStyle(color: global.aColor),
+      ),
+      content: Text(message, style: TextStyle(color: global.aColor)),
+      actions: [
+        ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor:
+                MaterialStateProperty.all<Color>(global.aColor)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'OK',
+              style: TextStyle(color: global.bColor),
+            )),
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return inputFail;
+      },
+    );
   }
 }

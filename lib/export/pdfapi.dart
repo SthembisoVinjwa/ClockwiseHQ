@@ -3,15 +3,30 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart' as pwTable;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../attendance/entry.dart';
 
 class PdfApi {
-  static Future<String> saveDocument(File file) async {
-    final downloadsDirectory = await getDownloadsDirectory();
-    final savedFile = await file.copy('${downloadsDirectory!.path}/${file.path.split('/').last}');
+  Future<String> saveToDownloads(File file) async {
+    // Request permission
+    final PermissionStatus status = await Permission.storage.request();
+    if (status != PermissionStatus.granted) {
+      throw Exception('Permission denied');
+    }
 
-    return savedFile.path;
+    // Get the platform-specific downloads directory
+    final directory = Platform.isAndroid
+        ? Directory('/storage/emulated/0/Download/')
+        : await getDownloadsDirectory();
+
+    // Create a new file in the downloads directory
+    final String fileName = 'Attendance_report.pdf';
+    final String filePath = '${directory!.path}/$fileName';
+
+    final File newFile = await file.copy(filePath);
+
+    return newFile.path;
   }
 
   static Future<File> exportAttendanceEntries(List<AttendanceEntry> entries) async {
