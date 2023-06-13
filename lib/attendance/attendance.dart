@@ -61,7 +61,8 @@ class _AttendanceState extends State<Attendance> {
     if (entries.isNotEmpty) {
       await AttendanceFile().saveAttendance(entries);
       final attendance = await AttendanceFile().readAttendance();
-      Provider.of<MainProvider>(context, listen: false).updateAttendanceEntries(attendance);
+      Provider.of<MainProvider>(context, listen: false)
+          .updateAttendanceEntries(attendance);
     }
   }
 
@@ -144,9 +145,6 @@ class _AttendanceState extends State<Attendance> {
                 ),
               ],
             ),
-            TextButton(onPressed: () {setState(() {
-              AttendanceFile().clear();
-            });}, child: Text('Clear')),
             SizedBox(height: 5),
             // Add some spacing between the text and the list
             Expanded(

@@ -193,6 +193,48 @@ class _TimetableState extends State<Timetable> {
                         : const SizedBox(
                             height: 60,
                           ),
+                    const SizedBox(
+                      width: 30,
+                    ),
+                    if (_dropdownValue == 'Weekly')
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: global.aColor,
+                          backgroundColor: darkMode
+                              ? Colors.black87.withOpacity(0.25)
+                              : Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(color: global.aColor),
+                            borderRadius: BorderRadius.circular(15),
+                          ), // Text color
+                        ),
+                        onPressed: () {
+                          try {
+                            setState(() {
+                              TimetableFile().clearFile();
+                              provider.updateActivityList([
+                                Activity(
+                                  'none',
+                                  'none',
+                                  'none',
+                                  {'mon': [TimeOfDay(hour: 0, minute: 0)]},
+                                  'class',
+                                  DateTime.utc(2010, 10, 16),
+                                  DateTime.utc(2011, 10, 16),
+                                )
+                              ]);
+                            });
+                            showMessage(
+                                'Timetable has been deleted.', 'Deletion');
+                          } catch (e) {
+                            showMessage('Could not delete timetable',
+                                'Something went wrong');
+                          }
+                        },
+                        child: const Text('Delete Timetable'),
+                      ),
                   ],
                 ),
                 if (_isLoadingActivities)
@@ -321,23 +363,157 @@ class _TimetableState extends State<Timetable> {
               style: TextStyle(color: global.aColor),
             )),
             for (final day in daysOfWeek)
-              DataCell(Container(
-                alignment: Alignment.center,
-                width: 55,
-                child: Text(
-                  maxLines: 3,
-                  style: TextStyle(fontSize: 12, color: global.aColor),
-                  overflow: TextOverflow.ellipsis,
-                  capitalize(toDisplay
-                      .where((activity) =>
-                          activity.timeOfDayMap.containsKey(day) &&
-                          activity.timeOfDayMap[day]!.contains(time))
-                      .map((activity) => activity.title)
-                      .join('\n')),
+              DataCell(InkWell(
+                onTap: () {
+                  final matchingActivity = toDisplay.firstWhere(
+                    (activity) =>
+                        activity.timeOfDayMap.containsKey(day) &&
+                        activity.timeOfDayMap[day]!.contains(time),
+                    orElse: () => Activity(
+                      '',
+                      '',
+                      '',
+                      {},
+                      '',
+                      DateTime.utc(2000, 10, 16),
+                      DateTime.utc(2090, 10, 16),
+                    ),
+                  );
+                  showActivityDialog(
+                    matchingActivity,
+                    day,
+                    time,
+                  );
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 55,
+                  child: Text(
+                    maxLines: 3,
+                    style: TextStyle(fontSize: 12, color: global.aColor),
+                    overflow: TextOverflow.ellipsis,
+                    capitalize(
+                      toDisplay
+                          .where((activity) =>
+                              activity.timeOfDayMap.containsKey(day) &&
+                              activity.timeOfDayMap[day]!.contains(time))
+                          .map((activity) => activity.title)
+                          .join('\n'),
+                    ),
+                  ),
                 ),
               )),
           ]),
       ],
+    );
+  }
+
+  int getWeekNumber(DateTime dateTime) {
+    DateTime firstDayOfYear = DateTime(dateTime.year, 1, 1);
+    int differenceInDays = dateTime.difference(firstDayOfYear).inDays;
+    int weekNumber = (differenceInDays ~/ 7) + 1;
+    return weekNumber;
+  }
+
+  DateTime getDateFromWeekAndDay(int week, int day) {
+    DateTime firstDayOfYear = DateTime(DateTime.now().year, 1, 1);
+    int daysToAdd = week * 7 + (day - firstDayOfYear.weekday + 1);
+    return firstDayOfYear.add(Duration(days: daysToAdd));
+  }
+
+  String formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString();
+
+    return "$day/$month/$year";
+  }
+
+  void showMessage(String message, String title) {
+    AlertDialog inputFail = AlertDialog(
+      backgroundColor: global.bColor,
+      title: Text(
+        title,
+        style: TextStyle(color: global.aColor),
+      ),
+      content: Text(message, style: TextStyle(color: global.aColor)),
+      actions: [
+        ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(global.aColor)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'OK',
+              style: TextStyle(color: global.bColor),
+            )),
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return inputFail;
+      },
+    );
+  }
+
+  showActivityDialog(Activity activity, String day, TimeOfDay time) {
+    int dayIndex = daysOfWeek.indexOf(day);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: global.bColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  activity.title,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: global.aColor),
+                ),
+                SizedBox(height: 10.0),
+                Text('Location: ${activity.location}',
+                    style: TextStyle(color: global.aColor)),
+                Text('Instructor: ${activity.instructor}',
+                    style: TextStyle(color: global.aColor)),
+                Text(
+                    'Date: ${formatDate(getDateFromWeekAndDay(getWeekNumber(DateTime.now()), dayIndex))}',
+                    style: TextStyle(color: global.aColor)),
+                Text('Time: ${time.format(context)}',
+                    style: TextStyle(color: global.aColor)),
+                // Add more information fields as needed
+                SizedBox(height: 20.0),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                          MaterialStateProperty.all<Color>(global.aColor)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(color: global.bColor),
+                      )),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

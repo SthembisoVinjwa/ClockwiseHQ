@@ -86,7 +86,7 @@ class _RecordsState extends State<Records> {
                       )),
             );
           },
-          child: const Text('Generate PDF'),
+          child: const Text('Export to PDF'),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

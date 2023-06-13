@@ -230,7 +230,7 @@ class _HomeState extends State<Home> {
                         color: global.bColor,
                       ),
                       Text(
-                        "  Timetable & Attendance",
+                        "VSTable",
                         style: TextStyle(
                           color: global.bColor,
                           fontSize: 18.0,
@@ -348,7 +348,7 @@ class _HomeState extends State<Home> {
                   color: global.aColor,
                 ),
                 Text(
-                  "  Timetable & Attendance",
+                  "VSTable",
                   style: TextStyle(
                     fontSize: 14.0,
                     color: global.aColor,
@@ -358,17 +358,6 @@ class _HomeState extends State<Home> {
             ),
             centerTitle: true,
             actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_none_sharp,
-                  size: 25.0,
-                  color: global.aColor,
-                ),
-                onPressed: () {
-                  // Show list of notifications
-                  showNotifications(context);
-                },
-              ),
               IconButton(
                 icon: Icon(
                   Icons.more_vert,
@@ -675,48 +664,5 @@ class _HomeState extends State<Home> {
             ),
           ],
         ));
-  }
-
-  void showNotifications(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Notifications',
-            style: TextStyle(fontSize: 18, color: global.aColor),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 200,
-            child: ListView.builder(
-              itemCount: 10,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: Icon(
-                    Icons.notifications,
-                    color: global.cColor,
-                  ),
-                  title: Text(
-                    'Notification ${index + 1}',
-                    style: TextStyle(color: global.aColor),
-                  ),
-                  subtitle: Text('This is a notification',
-                      style: TextStyle(color: global.cColor)),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text('OK', style: TextStyle(color: global.aColor)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }
