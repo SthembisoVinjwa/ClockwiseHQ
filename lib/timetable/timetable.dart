@@ -211,27 +211,7 @@ class _TimetableState extends State<Timetable> {
                           ), // Text color
                         ),
                         onPressed: () {
-                          try {
-                            setState(() {
-                              TimetableFile().clearFile();
-                              provider.updateActivityList([
-                                Activity(
-                                  'none',
-                                  'none',
-                                  'none',
-                                  {'mon': [TimeOfDay(hour: 0, minute: 0)]},
-                                  'class',
-                                  DateTime.utc(2010, 10, 16),
-                                  DateTime.utc(2011, 10, 16),
-                                )
-                              ]);
-                            });
-                            showMessage(
-                                'Timetable has been deleted.', 'Deletion');
-                          } catch (e) {
-                            showMessage('Could not delete timetable',
-                                'Something went wrong');
-                          }
+                          confirm(provider);
                         },
                         child: const Text('Delete Timetable'),
                       ),
@@ -293,6 +273,28 @@ class _TimetableState extends State<Timetable> {
         ],
       ),
     );
+  }
+
+  void _deletion(MainProvider provider) {
+    try {
+      TimetableFile().clearFile();
+      provider.updateActivityList([
+        Activity(
+          'none',
+          'none',
+          'none',
+          {
+            'mon': [TimeOfDay(hour: 0, minute: 0)]
+          },
+          'class',
+          DateTime.utc(2010, 10, 16),
+          DateTime.utc(2011, 10, 16),
+        )
+      ]);
+      showMessage('Timetable has been deleted.', 'Deletion');
+    } catch (e) {
+      showMessage('Could not delete timetable', 'Something went wrong');
+    }
   }
 
   Widget buildWeeklyTable() {
@@ -459,6 +461,49 @@ class _TimetableState extends State<Timetable> {
     );
   }
 
+  void confirm(MainProvider provider) {
+    AlertDialog inputFail = AlertDialog(
+      backgroundColor: global.bColor,
+      title: Text(
+        "Confirm Deletion",
+        style: TextStyle(color: global.aColor),
+      ),
+      content: Text("Are you sure you want to delete your timetable?",
+          style: TextStyle(color: global.aColor)),
+      actions: [
+        ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(global.aColor)),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deletion(provider);
+            },
+            child: Text(
+              'Yes',
+              style: TextStyle(color: global.bColor),
+            )),
+        ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(global.aColor)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'No',
+              style: TextStyle(color: global.bColor),
+            )),
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return inputFail;
+      },
+    );
+  }
+
   showActivityDialog(Activity activity, String day, TimeOfDay time) {
     int dayIndex = daysOfWeek.indexOf(day);
 
@@ -495,12 +540,29 @@ class _TimetableState extends State<Timetable> {
                     style: TextStyle(color: global.aColor)),
                 // Add more information fields as needed
                 SizedBox(height: 20.0),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: ElevatedButton(
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  ElevatedButton.icon(
+                      icon: Icon(
+                        Icons.delete_forever_sharp,
+                        color: global.bColor,
+                      ),
                       style: ButtonStyle(
                           backgroundColor:
-                          MaterialStateProperty.all<Color>(global.aColor)),
+                              MaterialStateProperty.all<Color>(global.aColor)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      label: Text(
+                        'Delete',
+                        style: TextStyle(color: global.bColor),
+                      )),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(global.aColor)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -508,7 +570,7 @@ class _TimetableState extends State<Timetable> {
                         'OK',
                         style: TextStyle(color: global.bColor),
                       )),
-                ),
+                ]),
               ],
             ),
           ),
@@ -590,19 +652,42 @@ class _TimetableState extends State<Timetable> {
               style: TextStyle(color: global.aColor),
             )),
             for (final day in currentDay)
-              DataCell(Container(
-                width: MediaQuery.of(context).size.width - 189,
-                alignment: Alignment.center,
-                child: Text(
-                  maxLines: 3,
-                  style: TextStyle(fontSize: 14, color: global.aColor),
-                  overflow: TextOverflow.ellipsis,
-                  capitalize(toDisplay
-                      .where((activity) =>
-                          activity.timeOfDayMap.containsKey(day) &&
-                          activity.timeOfDayMap[day]!.contains(time))
-                      .map((activity) => activity.title)
-                      .join('\n')),
+              DataCell(InkWell(
+                onTap: () {
+                  final matchingActivity = toDisplay.firstWhere(
+                    (activity) =>
+                        activity.timeOfDayMap.containsKey(day) &&
+                        activity.timeOfDayMap[day]!.contains(time),
+                    orElse: () => Activity(
+                      'None',
+                      '',
+                      '',
+                      {},
+                      '',
+                      DateTime.utc(2000, 10, 16),
+                      DateTime.utc(2090, 10, 16),
+                    ),
+                  );
+                  showActivityDialog(
+                    matchingActivity,
+                    day,
+                    time,
+                  );
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width - 189,
+                  alignment: Alignment.center,
+                  child: Text(
+                    maxLines: 3,
+                    style: TextStyle(fontSize: 14, color: global.aColor),
+                    overflow: TextOverflow.ellipsis,
+                    capitalize(toDisplay
+                        .where((activity) =>
+                            activity.timeOfDayMap.containsKey(day) &&
+                            activity.timeOfDayMap[day]!.contains(time))
+                        .map((activity) => activity.title)
+                        .join('\n')),
+                  ),
                 ),
               )),
           ]),
